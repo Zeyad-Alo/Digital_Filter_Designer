@@ -2,7 +2,7 @@ from dash import dcc
 from dash import html
 import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
-from home import create_page_home
+from interface.home import create_home_page
 from apps.page_2 import create_page_2
 from apps.page_3 import create_page_3
 from app import app
@@ -16,7 +16,7 @@ app.layout = dbc.Container(
                     "Digital Filter Designer",
                     className="text-center bg-dark text-white p-2",
                 ),
-        create_page_home(),
+        create_home_page(),
     ],
     className="p-0",
     

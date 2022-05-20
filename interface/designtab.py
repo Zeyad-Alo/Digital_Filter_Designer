@@ -9,7 +9,14 @@ import plotly.graph_objects as go
 import numpy as np
 
 
+#   PLOT FUNCTION USED TO CREATE ALL GRAPHS (PLACEHOLDER?)
+def plot():
+    fig = go.Figure(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
+    return fig
 
+
+
+#   CREATES THE ZPLANE GRAPH
 def zplane_plot():
     t = np.linspace(0, 2*np.pi, 100)
     radius = 1
@@ -21,26 +28,20 @@ def zplane_plot():
     return fig3
 
 
-def mag_response_plot():
-    fig = go.Figure(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
-    return fig
 
 
-def phase_response_plot():
-    fig = go.Figure(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
-    return fig
-
-
+#   CARD WHERE ZPLANE PLOT LIES
+#   PS: CARDS ARE UI ELEMENTS ONLY THE ORGANIZE FUNCTIONAL CONTENT
 zplane_card = dbc.Card(
     [
         dbc.CardHeader("Z-Plane"),
         dbc.CardBody(dcc.Graph(id='z_plane', figure= zplane_plot()), className = "p-0"),
     ],
-    #className="m-0",
-
     )
 
 
+
+#   CONTENT INSIDE COLLAPSE CARD
 collapse_content = html.Div(
     [
         dbc.Row([
@@ -59,6 +60,8 @@ collapse_content = html.Div(
         ])
 
 
+
+#   CREATES COLLAPSE CARD HOLDING USER INPUTS
 collapse = html.Div(
     [
         html.Div(
@@ -69,7 +72,6 @@ collapse = html.Div(
                     [dbc.DropdownMenuItem("Zeros"), dbc.DropdownMenuItem("Poles"), dbc.DropdownMenuItem("All")],
                     label="Clear",
                     group=True)],
-                size = 'md'
 )
         ],
     ),
@@ -83,35 +85,42 @@ collapse = html.Div(
 )
 
 
+
+#   OPTIONS (PREFERENCES) CARD BELOW ZPLANE
 options_card = dbc.Card(
     [
         dbc.CardHeader("Preferences"),
         dbc.CardBody(collapse, style={'margin-left': '-1px'}, className = "p-1"),
-        dbc.CardFooter(dbc.Switch(id = 'conj_checklist', label = "Add Conjugates"))
-    ],
-    #className="mt-4",
+        dbc.CardFooter(
+        dbc.Row([
+            dbc.Col(dbc.Switch(id = 'conj_checklist', label = "Add Conjugates")),
+            dbc.Col(dbc.Button("Apply!", id = 'apply_button', color="primary", size='sm'), width=3),
+            ]),
+        style={'padding-left': '10px', 'padding-right':'20px'}
+    )],
 )
-
 
 
 
 mag_card = dbc.Card(
     [
         dbc.CardHeader("Magnitude Response"),
-        dbc.CardBody(dcc.Graph(id='mag_response', figure=mag_response_plot()), className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='mag_response', figure=plot()), className = "p-0"),
     ],
-    #className="pt-0",
 )
+
+
 
 phase_card = dbc.Card(
     [
         dbc.CardHeader("Phase Response"),
-        dbc.CardBody(dcc.Graph(id='phase_response', figure=phase_response_plot()), className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='phase_response', figure=plot()), className = "p-0"),
     ],
-    #className="mt-4",
 )
 
 
+
+#   PUTS EVERYTHING IN DESIGN TAB TOGETHER IN A LAYOUT
 def design_tab_layout():
     layout = html.Div([
         dbc.Row([
@@ -123,36 +132,10 @@ def design_tab_layout():
     return layout
 
 
-def create_page_home():
-    layout = html.Div([
-        dbc.Tabs(
-            [
-                dbc.Tab(label="Design!", tab_id="design_filter"),
-                dbc.Tab(label="Implement!", tab_id="apply_implement"),
-            ],
-            id="tabs",
-            active_tab="design_filter",
-        ),
-        html.Div(id="tab-content", className="p-4"),
-        ],
-          className="mx-4"          
-                      )
-    return layout
-
-
-@app.callback(
-    Output("tab-content", "children"),
-    Input("tabs", "active_tab"),
-)
-def render_tab_content(active_tab):
-    if active_tab == "design_filter":
-        return design_tab_layout()
-        print("design")
-    else:
-        pass
 
 
 
+#   CALLBACK FOR COLLAPSE BUTTONS (ZEROS BUTTON AND POLES BUTTON)
 @app.callback(
     Output("collapse", "is_open"),
     Output("zeros_button", "active"),
