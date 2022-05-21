@@ -56,7 +56,11 @@ collapse_content = html.Div(
             dbc.Col(dcc.Slider(0, 180, value=0, marks=None,
     tooltip={"placement": "bottom", "always_visible": True}, className="p-0"), style={'padding-top':'8px'})
             ],
-            )
+            ),
+        dbc.Row([
+            dbc.Col(),
+            dbc.Col(dbc.Button("Add!", id = 'add_button', color="primary", size='sm'), width=3),
+            ]),
         ])
 
 
@@ -77,7 +81,7 @@ collapse = html.Div(
     ),
         
         dbc.Collapse(
-            dbc.Card(dbc.CardBody(collapse_content, style={'padding-left':'8px'}), style={'margin-top':'10px'}),
+            dbc.Card(dbc.CardBody(collapse_content, style={'padding-left':'8px', 'padding-bottom':'10px'}), style={'margin-top':'10px'}),
             id="collapse",
             is_open=False,
         ),
