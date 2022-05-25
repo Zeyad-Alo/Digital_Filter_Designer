@@ -1,5 +1,6 @@
 from dash import dcc, ctx
 from dash import html
+from dash import callback_context
 from apps.navbar import create_navbar
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -7,6 +8,14 @@ from app import app
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
+import cmath 
+from modules import filtercreator
+
+
+zeros_reals=[0]
+zeros_imags=[0]
+poles_reals=[0]
+poles_imags=[0]
 
 
 #   PLOT FUNCTION USED TO CREATE ALL GRAPHS (PLACEHOLDER?)
@@ -14,31 +23,14 @@ def plot():
     fig = go.Figure(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
     return fig
 
-
-
-#   CREATES THE ZPLANE GRAPH
-def zplane_plot():
-    t = np.linspace(0, 2*np.pi, 100)
-    radius = 1
-    x = radius * np.cos(t)
-    y = radius * np.sin(t)
-    fig = px.line(x=x, y=y, labels={'x':'t', 'y':'cos(t)'})
-    fig2 = px.scatter(x=[0.3], y=[1])
-    fig3 = go.Figure(data=fig.data + fig2.data, layout=dict(template='plotly_dark', height = 300, margin_b = 20, margin_l = 10, margin_r = 10, margin_t = 20))
-    return fig3
-
-
-
-
 #   CARD WHERE ZPLANE PLOT LIES
 #   PS: CARDS ARE UI ELEMENTS ONLY THE ORGANIZE FUNCTIONAL CONTENT
 zplane_card = dbc.Card(
     [
         dbc.CardHeader("Z-Plane"),
-        dbc.CardBody(dcc.Graph(id='z_plane', figure= zplane_plot()), className = "p-0"),
-    ],
+        dbc.CardBody(dcc.Graph(id='z_plane', figure= {}, className = "p-0"),
+    )],
     )
-
 
 
 #   CONTENT INSIDE COLLAPSE CARD
@@ -53,17 +45,15 @@ collapse_content = html.Div(
         html.Br(),
         dbc.Row([
             dbc.Col(dcc.Markdown('$Theta$', mathjax=True, className="p-0", style={'margin-top':'0px'}), width=3, style={'margin-top':'0px'}),
-            dbc.Col(dcc.Slider(0, 180, value=0, marks=None,
+            dbc.Col(dcc.Slider(0, 180, value=0, marks=None,id = 'theta_slider',
     tooltip={"placement": "bottom", "always_visible": True}, className="p-0"), style={'padding-top':'8px'})
             ],
             ),
         dbc.Row([
             dbc.Col(),
-            dbc.Col(dbc.Button("Add!", id = 'add_button', color="primary", size='sm'), width=3),
+            dbc.Col(dbc.Button("Add!", id = 'add_button',n_clicks=0, color="primary", size='sm'), width=3),
             ]),
         ])
-
-
 
 #   CREATES COLLAPSE CARD HOLDING USER INPUTS
 collapse = html.Div(
@@ -103,6 +93,8 @@ options_card = dbc.Card(
         style={'padding-left': '10px', 'padding-right':'20px'}
     )],
 )
+
+
 
 
 
@@ -163,3 +155,69 @@ def toggle_collapse(n, p_n, is_open, active, p_active):
         elif p_n and active:
             return is_open, not active, not p_active
     return is_open, active, p_active
+
+
+#symbol = 'x-open' symbol = 'circle-dot' symbol = 'circle-open-dot'  symbol = 'x-open-do'
+#   CALLBACK FOR Mag and Theta
+@app.callback(
+    Output("z_plane", "figure"),
+    Input("add_button","n_clicks"),
+    Input("mag_slider", "value"),
+    Input("theta_slider", "value"),
+    State("zeros_button", "active"),
+    State("poles_button", "active"),
+
+)
+def zplane_plot(nclicks,mag_value,theta_value,z_active,p_active):
+    # given in polar form 
+    #TODO:change it to complex form
+
+    t = np.linspace(0, 2*np.pi, 100)
+    radius = 1
+    x = radius * np.cos(t)
+    y = radius * np.sin(t)
+    fig = px.line(x=x, y=y, labels={'x':'t', 'y':'cos(t)'})
+
+
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+
+
+    z_axis=cmath.rect(mag_value,(theta_value*np.pi/180))
+    if z_active and 'add_button' in changed_id:
+        print("zeros")
+        zeros_reals.append( z_axis.real)
+        zeros_imags.append( z_axis.imag)
+
+        fig2 = px.scatter(x=list(zeros_reals), y=list(zeros_imags))
+        fig2.update_traces(marker=dict(size=12,
+                                    line=dict(width=2,
+                                            color='DarkSlateGrey'),symbol = 'circle-open'),
+                        selector=dict(mode='markers')) 
+    elif p_active and 'add_button' in changed_id:
+        print("poles")
+        poles_reals.append( z_axis.real)
+        poles_imags.append( z_axis.imag)
+  
+        fig3 = px.scatter(x=list(poles_reals), y=list(poles_imags))
+        fig3.update_traces(marker=dict(size=12,
+                                    line=dict(width=2,
+                                            color='DarkSlateGrey'),symbol = 'x-open'),
+                        selector=dict(mode='markers'))
+    print("here")
+    fig2 = px.scatter(x=list(zeros_reals), y=list(zeros_imags))
+    fig2.update_traces(marker=dict(size=12,
+                                line=dict(width=2,
+                                        color='DarkSlateGrey'),symbol = 'circle-open'),
+                    selector=dict(mode='markers'))
+    fig3 = px.scatter(x=list(poles_reals), y=list(poles_imags))
+    fig3.update_traces(marker=dict(size=12,
+                                line=dict(width=2,
+                                        color='DarkSlateGrey'),symbol = 'x-open'),
+                    selector=dict(mode='markers'))
+
+        
+
+    fig4 = go.Figure(data=fig.data + fig2.data + fig3.data, layout=dict(template='plotly_dark', height = 300, margin_b = 20, margin_l = 10, margin_r = 10, margin_t = 20))
+    return fig4
+
+#CALL BACKS WITH 

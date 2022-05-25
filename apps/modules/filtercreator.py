@@ -1,3 +1,5 @@
+import math
+
 class Filter():
     def __init__(self, name, type, poles=[], zeros=[]):
         self.name = name
@@ -23,6 +25,12 @@ class Filter():
     def edit_zero(self, zero, new_zero):
         self.filter_zeros[zero] = new_zero
 
+    def filter_type(self ,self.filter_poles, self.filter_zeros):
+        if len(self.filter_poles) == 0:
+            self.filter_type = "FIR"
+        else :
+            self.filter_type = "IIR"
+
     def get_magnitude_response(self):
         # update equation and return based on filter type and poles and zeros
         return self.filter_magnitude_response
@@ -44,6 +52,9 @@ class Filter():
         # generate filter file.txt
         # contains coefficients of filter?? idk
         return None
+    def system_gain(self):
+        # calculating the gain of the system mag response
+        pass
 
 
 def plot_magnitude_response(filter_response):
