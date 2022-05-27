@@ -9,26 +9,56 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import cmath 
-from modules import filtercreator
+from apps.modules import filtercreator
+
 
 
 zeros_reals=[0]
 zeros_imags=[0]
 poles_reals=[0]
 poles_imags=[0]
+z_plane=[]
+mag_zeros=[]
+mag_imag=[]
+# intializing figures in order to update them later(their layouts)
 
-
-#   PLOT FUNCTION USED TO CREATE ALL GRAPHS (PLACEHOLDER?)
+fig = go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
+fig2= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
+#   PLOT FUNCTIONS
+#THIS IS A PLACEHOLDER IN ORDER TO INITIALIZE OUR CARDS 
 def plot():
     fig = go.Figure(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
     return fig
+# for the second plot TO INITIALIZE THE MAGNITUDE CARD
+def plot_2():
+    fig2.add_scatter(x=[1],y=[1],mode="markers")
+    return fig2
 
-#   CARD WHERE ZPLANE PLOT LIES
+
+#   TO INITIALIZE THE ZPLANE CARDS 
+
+def zplane_plot():
+    #labels={'x':'t', 'y':'cos(t)'}
+    # drawing the circle
+    t = np.linspace(0, 2*np.pi, 100)
+    radius = 1
+    x = radius * np.cos(t)
+    y = radius * np.sin(t)
+    # these data are added to a scatter plt(to make points)
+    #data 0 for the unit circle 
+    fig.add_scatter(x=x,y=y,mode="lines")
+    # data 1 for zeros points
+    fig.add_scatter(x=[zeros_reals],y=[zeros_imags],mode="markers")
+    #data 2 for poles points
+    fig.add_scatter(x=[poles_reals],y=[poles_imags],mode="markers")
+    # this is returned in the 'figure=' of the zplane plot (look for the z plane card)
+    return fig
+
 #   PS: CARDS ARE UI ELEMENTS ONLY THE ORGANIZE FUNCTIONAL CONTENT
 zplane_card = dbc.Card(
     [
         dbc.CardHeader("Z-Plane"),
-        dbc.CardBody(dcc.Graph(id='z_plane', figure= {}, className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='z_plane', figure= zplane_plot(), className = "p-0"),
     )],
     )
 
@@ -38,14 +68,14 @@ collapse_content = html.Div(
     [
         dbc.Row([
             dbc.Col(dcc.Markdown(['Mag'], className="p-0", style={'margin-top':'0px'}), width=3, style={'margin-top':'0px'}),
-            dbc.Col(dcc.Slider(0, 1, value=0, marks=None, id = 'mag_slider',
+            dbc.Col(dcc.Slider(0, 0.99, value=0, marks=None, id = 'mag_slider',
     tooltip={"placement": "bottom", "always_visible": True}, className="p-0"), style={'padding-top':'8px'})
             ],
             ),
         html.Br(),
         dbc.Row([
             dbc.Col(dcc.Markdown('$Theta$', mathjax=True, className="p-0", style={'margin-top':'0px'}), width=3, style={'margin-top':'0px'}),
-            dbc.Col(dcc.Slider(0, 180, value=0, marks=None,id = 'theta_slider',
+            dbc.Col(dcc.Slider(0, 179, value=0, marks=None,id = 'theta_slider',
     tooltip={"placement": "bottom", "always_visible": True}, className="p-0"), style={'padding-top':'8px'})
             ],
             ),
@@ -101,7 +131,7 @@ options_card = dbc.Card(
 mag_card = dbc.Card(
     [
         dbc.CardHeader("Magnitude Response"),
-        dbc.CardBody(dcc.Graph(id='mag_response', figure=plot()), className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='mag_response', figure=plot_2()), className = "p-0"),
     ],
 )
 
@@ -116,11 +146,12 @@ phase_card = dbc.Card(
 
 
 
+
 #   PUTS EVERYTHING IN DESIGN TAB TOGETHER IN A LAYOUT
 def design_tab_layout():
     layout = html.Div([
         dbc.Row([
-            dbc.Col([zplane_card, html.Br(), options_card], width=3),
+            dbc.Col([zplane_card,html.Br(), options_card], width=3),
             dbc.Col([mag_card, html.Br(), phase_card])
             ])
         ],            
@@ -159,8 +190,11 @@ def toggle_collapse(n, p_n, is_open, active, p_active):
 
 #symbol = 'x-open' symbol = 'circle-dot' symbol = 'circle-open-dot'  symbol = 'x-open-do'
 #   CALLBACK FOR Mag and Theta
+#call backs should have atleast one output and one input it takes 2 arguments first the id of the card and second the type of the date 
+#that will be returned
 @app.callback(
     Output("z_plane", "figure"),
+
     Input("add_button","n_clicks"),
     Input("mag_slider", "value"),
     Input("theta_slider", "value"),
@@ -168,56 +202,91 @@ def toggle_collapse(n, p_n, is_open, active, p_active):
     State("poles_button", "active"),
 
 )
-def zplane_plot(nclicks,mag_value,theta_value,z_active,p_active):
-    # given in polar form 
-    #TODO:change it to complex form
 
-    t = np.linspace(0, 2*np.pi, 100)
-    radius = 1
-    x = radius * np.cos(t)
-    y = radius * np.sin(t)
-    fig = px.line(x=x, y=y, labels={'x':'t', 'y':'cos(t)'})
-
-
+def zplane_update(nclicks,mag_value,theta_value,z_active,p_active):
+ # this is initialized in order to know which button is pressed
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
-
-
+    # theta value and mag value are taken from the sliders
     z_axis=cmath.rect(mag_value,(theta_value*np.pi/180))
+    #this loop is entred when both the zeros button is open and the user pressed add
     if z_active and 'add_button' in changed_id:
         print("zeros")
         zeros_reals.append( z_axis.real)
         zeros_imags.append( z_axis.imag)
-
-        fig2 = px.scatter(x=list(zeros_reals), y=list(zeros_imags))
-        fig2.update_traces(marker=dict(size=12,
-                                    line=dict(width=2,
-                                            color='DarkSlateGrey'),symbol = 'circle-open'),
-                        selector=dict(mode='markers')) 
+        
+        scatter_zero = fig.data[1]
+        scatter_zero.x = list(zeros_reals)
+        scatter_zero.y = list(zeros_imags)
+        scatter_zero.marker.symbol = 'circle-open'
+#this loop is entred when both the poles button is open and the user pressed add
     elif p_active and 'add_button' in changed_id:
         print("poles")
         poles_reals.append( z_axis.real)
         poles_imags.append( z_axis.imag)
-  
-        fig3 = px.scatter(x=list(poles_reals), y=list(poles_imags))
-        fig3.update_traces(marker=dict(size=12,
-                                    line=dict(width=2,
-                                            color='DarkSlateGrey'),symbol = 'x-open'),
-                        selector=dict(mode='markers'))
-    print("here")
-    fig2 = px.scatter(x=list(zeros_reals), y=list(zeros_imags))
-    fig2.update_traces(marker=dict(size=12,
-                                line=dict(width=2,
-                                        color='DarkSlateGrey'),symbol = 'circle-open'),
-                    selector=dict(mode='markers'))
-    fig3 = px.scatter(x=list(poles_reals), y=list(poles_imags))
-    fig3.update_traces(marker=dict(size=12,
-                                line=dict(width=2,
-                                        color='DarkSlateGrey'),symbol = 'x-open'),
-                    selector=dict(mode='markers'))
-
         
+        scatter_poles = fig.data[2]
+        scatter_poles.x = list(poles_reals)
+        scatter_poles.y = list(poles_imags)
+        scatter_poles.marker.symbol = 'x-open'
 
-    fig4 = go.Figure(data=fig.data + fig2.data + fig3.data, layout=dict(template='plotly_dark', height = 300, margin_b = 20, margin_l = 10, margin_r = 10, margin_t = 20))
-    return fig4
+    print("here")
+    
 
-#CALL BACKS WITH 
+    # we return the figure in the "figure =" of zplot (find z plot card)
+    return fig
+
+#kol ali ta7t dah shelo
+#CALL BACKS FOR MAGNITUDE GRAPH
+mag1=[]
+mag2=[0]
+mag_zeros=[]
+mag_poles=[]
+multplication =1
+SAMPLING_FREQ=44100
+@app.callback(
+    Output("mag_response", "figure"),
+    Input("add_button","n_clicks"),
+
+)
+def sampling_freq(nclicks):
+    fmax=SAMPLING_FREQ/2
+    f=np.linspace(0, fmax, num=3)
+    w=f*np.pi/fmax #changed tp pi
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+    if 'add_button' in changed_id:    
+        for freq in w:
+            print("w:")
+            print(freq)
+            for i,r in enumerate(poles_reals):
+                x1=r
+                y1=poles_imags[i]
+                radius = 1
+                x2= radius * np.cos(freq)
+                y2= radius * np.sin(freq)
+                dist = np.sqrt( (x2 - x1)**2 + (y2 - y1)**2 )
+                mag_poles.append(dist)
+                print("poles_distance")
+                print(dist)
+            for i,r in enumerate(zeros_reals):
+                x1=r
+                y1=zeros_imags[i]
+                radius = 1
+                x2= radius * np.cos(freq)
+                y2= radius * np.sin(freq)
+                dist = np.sqrt( (x2 - x1)**2 + (y2 - y1)**2 )  
+                mag_zeros.append(dist)
+                print("zeros_distance")
+                print(dist)
+            for z,p in enumerate(mag_poles):
+                mag1.append(mag_zeros[z]/p)
+                print("z/p")
+                print(mag1)
+            for q in mag1:
+                multiplication=q*multplication 
+            mag2.append(multplication)             
+        scatter_mag = fig2.data[0]
+        scatter_mag.x = list(w)
+        scatter_mag.y = list(mag2)
+    return fig2
+
+
