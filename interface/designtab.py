@@ -31,7 +31,7 @@ def plot():
     return fig
 # for the second plot TO INITIALIZE THE MAGNITUDE CARD
 def plot_2():
-    fig2.add_scatter(x=[1],y=[1],mode="markers")
+    fig2.add_scatter(x=[1],y=[1])
     return fig2
 
 
@@ -238,10 +238,9 @@ def zplane_update(nclicks,mag_value,theta_value,z_active,p_active):
 #kol ali ta7t dah shelo
 #CALL BACKS FOR MAGNITUDE GRAPH
 mag1=[]
-mag2=[0]
-mag_zeros=[]
-mag_poles=[]
-multplication =1
+mag2=[]
+
+
 SAMPLING_FREQ=44100
 @app.callback(
     Output("mag_response", "figure"),
@@ -250,11 +249,18 @@ SAMPLING_FREQ=44100
 )
 def sampling_freq(nclicks):
     fmax=SAMPLING_FREQ/2
-    f=np.linspace(0, fmax, num=3)
+    f=np.linspace(0, fmax, num=50)
     w=f*np.pi/fmax #changed tp pi
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+    
     if 'add_button' in changed_id:    
         for freq in w:
+            multi_zeros = 1
+            multi_poles = 1
+            mag_zeros=[]
+            mag_poles=[]
+            print(multi_poles)
+            print(multi_zeros)
             print("w:")
             print(freq)
             for i,r in enumerate(poles_reals):
@@ -277,16 +283,25 @@ def sampling_freq(nclicks):
                 mag_zeros.append(dist)
                 print("zeros_distance")
                 print(dist)
-            for z,p in enumerate(mag_poles):
-                mag1.append(mag_zeros[z]/p)
-                print("z/p")
-                print(mag1)
-            for q in mag1:
-                multiplication=q*multplication 
-            mag2.append(multplication)             
+            
+            for z in mag_zeros:
+                multi_zeros= z*multi_zeros
+            for p in mag_poles:
+                multi_poles= p*multi_poles
+
+            print("multi_zeros")
+            print(multi_zeros)
+            print("multi_poles")
+            print(multi_poles)
+            overall=float(multi_zeros/multi_poles)
+            print("overlall")
+            print(overall)
+            mag2.append(overall)             
         scatter_mag = fig2.data[0]
         scatter_mag.x = list(w)
         scatter_mag.y = list(mag2)
+        print(w)
+        print(mag2)
     return fig2
 
 
