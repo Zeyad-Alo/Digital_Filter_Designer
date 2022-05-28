@@ -55,10 +55,13 @@ def zplane_plot():
     # these data are added to a scatter plt(to make points)
     #data 0 for the unit circle 
     fig.add_scatter(x=x,y=y,mode="lines")
+    
     # data 1 for zeros points
     fig.add_scatter(x=[zeros_reals],y=[zeros_imags],mode="markers")
+    fig.data[1].marker.symbol = 'circle-open'
     #data 2 for poles points
     fig.add_scatter(x=[poles_reals],y=[poles_imags],mode="markers")
+    fig.data[2].marker.symbol = 'x-open'
     # this is returned in the 'figure=' of the zplane plot (look for the z plane card)
     return fig
 
@@ -76,14 +79,14 @@ collapse_content = html.Div(
     [
         dbc.Row([
             dbc.Col(dcc.Markdown(['Mag'], className="p-0", style={'margin-top':'0px'}), width=3, style={'margin-top':'0px'}),
-            dbc.Col(dcc.Slider(0, 0.99, value=0, marks=None, id = 'mag_slider',
+            dbc.Col(dcc.Slider(0, 2, value=0, marks=None, id = 'mag_slider',
     tooltip={"placement": "bottom", "always_visible": True}, className="p-0"), style={'padding-top':'8px'})
             ],
             ),
         html.Br(),
         dbc.Row([
             dbc.Col(dcc.Markdown('$Theta$', mathjax=True, className="p-0", style={'margin-top':'0px'}), width=3, style={'margin-top':'0px'}),
-            dbc.Col(dcc.Slider(0, 179, value=0, marks=None,id = 'theta_slider',
+            dbc.Col(dcc.Slider(0, 180, value=0, marks=None,id = 'theta_slider',
     tooltip={"placement": "bottom", "always_visible": True}, className="p-0"), style={'padding-top':'8px'})
             ],
             ),
@@ -245,11 +248,8 @@ def zplane_update(nclicks,mag_value,theta_value,z_active,p_active):
     # we return the figure in the "figure =" of zplot (find z plot card)
     return fig
 
-#kol ali ta7t dah shelo
-#CALL BACKS FOR MAGNITUDE GRAPH
 
-
-
+#CALL BACKS FOR MAGNITUDE/PHASE GRAPH
 
 SAMPLING_FREQ=44100
 @app.callback(
