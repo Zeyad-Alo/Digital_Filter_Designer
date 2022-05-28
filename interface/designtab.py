@@ -8,7 +8,8 @@ from app import app
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
-import cmath 
+import cmath
+import math 
 from apps.modules import filtercreator
 
 
@@ -24,6 +25,7 @@ mag_imag=[]
 
 fig = go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 fig2= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
+fig3= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 #   PLOT FUNCTIONS
 #THIS IS A PLACEHOLDER IN ORDER TO INITIALIZE OUR CARDS 
 def plot():
@@ -34,7 +36,11 @@ def plot_2():
     fig2.add_scatter(x=[1],y=[1])
     return fig2
 
-
+# for the third plot TO INITIALIZE THE MAGNITUDE CARD
+def plot_3():
+    fig3.add_scatter(x=[1],y=[1])
+    return fig3
+  
 #   TO INITIALIZE THE ZPLANE CARDS 
 
 def zplane_plot():
@@ -140,7 +146,7 @@ mag_card = dbc.Card(
 phase_card = dbc.Card(
     [
         dbc.CardHeader("Phase Response"),
-        dbc.CardBody(dcc.Graph(id='phase_response', figure=plot()), className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='phase_response', figure=plot_3()), className = "p-0"),
     ],
 )
 
@@ -237,13 +243,14 @@ def zplane_update(nclicks,mag_value,theta_value,z_active,p_active):
 
 #kol ali ta7t dah shelo
 #CALL BACKS FOR MAGNITUDE GRAPH
-mag1=[]
-mag2=[]
+
+
 
 
 SAMPLING_FREQ=44100
 @app.callback(
     Output("mag_response", "figure"),
+    Output("phase_response", "figure"),
     Input("add_button","n_clicks"),
 
 )
@@ -254,11 +261,18 @@ def sampling_freq(nclicks):
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
     
     if 'add_button' in changed_id:    
+        mag2=[]
+        phase=[]
         for freq in w:
             multi_zeros = 1
             multi_poles = 1
             mag_zeros=[]
             mag_poles=[]
+            multi_zeros_imags = 1
+            multi_poles_imags = 1
+            multi_zeros_reals = 1
+            multi_poles_reals = 1
+  
             print(multi_poles)
             print(multi_zeros)
             print("w:")
@@ -288,20 +302,37 @@ def sampling_freq(nclicks):
                 multi_zeros= z*multi_zeros
             for p in mag_poles:
                 multi_poles= p*multi_poles
+                # for figure 3
+            for z in zeros_imags:
+                multi_zeros_imags= z*multi_zeros_imags
+            for p in poles_imags:
+                multi_poles_imags= p*multi_poles_imags
+
+            for z in zeros_reals:
+                multi_zeros_reals= z*multi_zeros_reals
+            for p in poles_reals:
+                multi_poles_reals= p*multi_poles_reals
 
             print("multi_zeros")
             print(multi_zeros)
             print("multi_poles")
             print(multi_poles)
-            overall=float(multi_zeros/multi_poles)
-            print("overlall")
-            print(overall)
-            mag2.append(overall)             
+            overall_mag=float(multi_zeros/multi_poles)
+            overall_phase=math.atan(float(multi_zeros/multi_poles))
+            print("overall_mag")
+            print(overall_mag)
+            mag2.append(overall_mag)    
+            phase.append(overall_phase)
         scatter_mag = fig2.data[0]
         scatter_mag.x = list(w)
         scatter_mag.y = list(mag2)
         print(w)
         print(mag2)
-    return fig2
+        scatter_phase = fig3.data[0]
+        scatter_phase.x = list(w)
+        scatter_phase.y = list(phase)
+        print(w)
+        print(phase)
+    return fig2,fig3
 
 
