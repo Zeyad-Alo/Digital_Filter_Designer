@@ -11,13 +11,15 @@ import numpy as np
 import cmath
 import math 
 from apps.modules import filtercreator
-
+from scipy import signal as sg
 
 
 zeros_reals=[0]
 zeros_imags=[0]
 poles_reals=[0]
 poles_imags=[0]
+zeros_all=[]
+poles_all=[]
 z_plane=[]
 mag_zeros=[]
 mag_imag=[]
@@ -219,7 +221,8 @@ def zplane_update(nclicks,mag_value,theta_value,z_active,p_active):
         print("zeros")
         zeros_reals.append( z_axis.real)
         zeros_imags.append( z_axis.imag)
-        
+        zeros_all.append(z_axis)
+
         scatter_zero = fig.data[1]
         scatter_zero.x = list(zeros_reals)
         scatter_zero.y = list(zeros_imags)
@@ -229,7 +232,8 @@ def zplane_update(nclicks,mag_value,theta_value,z_active,p_active):
         print("poles")
         poles_reals.append( z_axis.real)
         poles_imags.append( z_axis.imag)
-        
+        poles_all.append(z_axis)
+
         scatter_poles = fig.data[2]
         scatter_poles.x = list(poles_reals)
         scatter_poles.y = list(poles_imags)
@@ -255,84 +259,28 @@ SAMPLING_FREQ=44100
 
 )
 def sampling_freq(nclicks):
-    fmax=SAMPLING_FREQ/2
-    f=np.linspace(0, fmax, num=50)
-    w=f*np.pi/fmax #changed tp pi
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
     
-    if 'add_button' in changed_id:    
-        mag2=[]
+    if 'add_button' in changed_id:  
+        mag=[]
         phase=[]
-        for freq in w:
-            multi_zeros = 1
-            multi_poles = 1
-            mag_zeros=[]
-            mag_poles=[]
-            multi_zeros_imags = 1
-            multi_poles_imags = 1
-            multi_zeros_reals = 1
-            multi_poles_reals = 1
-  
-            print(multi_poles)
-            print(multi_zeros)
-            print("w:")
-            print(freq)
-            for i,r in enumerate(poles_reals):
-                x1=r
-                y1=poles_imags[i]
-                radius = 1
-                x2= radius * np.cos(freq)
-                y2= radius * np.sin(freq)
-                dist = np.sqrt( (x2 - x1)**2 + (y2 - y1)**2 )
-                mag_poles.append(dist)
-                print("poles_distance")
-                print(dist)
-            for i,r in enumerate(zeros_reals):
-                x1=r
-                y1=zeros_imags[i]
-                radius = 1
-                x2= radius * np.cos(freq)
-                y2= radius * np.sin(freq)
-                dist = np.sqrt( (x2 - x1)**2 + (y2 - y1)**2 )  
-                mag_zeros.append(dist)
-                print("zeros_distance")
-                print(dist)
-            
-            for z in mag_zeros:
-                multi_zeros= z*multi_zeros
-            for p in mag_poles:
-                multi_poles= p*multi_poles
-                # for figure 3
-            for z in zeros_imags:
-                multi_zeros_imags= z*multi_zeros_imags
-            for p in poles_imags:
-                multi_poles_imags= p*multi_poles_imags
-
-            for z in zeros_reals:
-                multi_zeros_reals= z*multi_zeros_reals
-            for p in poles_reals:
-                multi_poles_reals= p*multi_poles_reals
-
-            print("multi_zeros")
-            print(multi_zeros)
-            print("multi_poles")
-            print(multi_poles)
-            overall_mag=float(multi_zeros/multi_poles)
-            overall_phase=math.atan(float(multi_zeros/multi_poles))
-            print("overall_mag")
-            print(overall_mag)
-            mag2.append(overall_mag)    
-            phase.append(overall_phase)
+        num,den=sg.zpk2tf(zeros_all, poles_all, 1)
+        w,freq_resp=sg.freqz(num, den, fs=SAMPLING_FREQ)
+        for h in freq_resp:
+            polar=cmath.polar(h)
+            mag.append(polar[0])
+            phase.append(polar[1])
+        
         scatter_mag = fig2.data[0]
         scatter_mag.x = list(w)
-        scatter_mag.y = list(mag2)
-        print(w)
-        print(mag2)
+        scatter_mag.y = list(mag)
+        
+        
         scatter_phase = fig3.data[0]
         scatter_phase.x = list(w)
         scatter_phase.y = list(phase)
-        print(w)
-        print(phase)
+       
+
     return fig2,fig3
 
 
