@@ -7,8 +7,8 @@ from app import app
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
-from interface.designtab import design_tab_layout
-from interface.implementtab import implement_tab_layout
+from apps.interface.designtab import design_tab_layout
+from apps.interface.implementtab import implement_tab_layout
 
 
 
