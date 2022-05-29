@@ -7,7 +7,7 @@ from app import app
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
-from interface.designtab import plot
+from apps.interface.designtab import plot
 
 
 
