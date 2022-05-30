@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import numpy as np
 from apps.interface.designtab import design_tab_layout
 from apps.interface.implementtab import implement_tab_layout
+from apps.interface.correcttab import correct_tab_layout
 
 
 
@@ -42,6 +43,8 @@ def render_tab_content(active_tab):
     if active_tab == "design_tab":
         return design_tab_layout()
         print("design")
+    elif active_tab == "correct_tab":
+        return correct_tab_layout()
     elif active_tab == "implement_tab":
         return implement_tab_layout()
 

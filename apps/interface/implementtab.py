@@ -40,8 +40,19 @@ filtered_signal_card = dbc.Card(
 )
 
 
+
+nav = dbc.Nav(
+    [
+        dbc.NavItem(dcc.Upload(dbc.Button('Upload File', size="sm")),
+),
+    ]
+)
+
+
+
 def implement_tab_layout():
     layout = html.Div([
+        dbc.Row(nav),
         dbc.Row(original_signal_card),
         html.Br(),
         dbc.Row(filtered_signal_card),
