@@ -1,11 +1,12 @@
 import math
-
+from scipy import signal as sg
 class Filter():
     def __init__(self, name, type, poles=[], zeros=[]):
         self.name = name
         self.filter_type = None
         self.filter_poles = poles
         self.filter_zeros = zeros
+        SAMPLING_FREQ=44100
 
     def add_pole(self, pole):
         self.filter_poles.append(pole)
@@ -31,14 +32,19 @@ class Filter():
         else :
             self.filter_type = "IIR"
 
-    def get_magnitude_response(self,zero,pole,fmax):
+    def get_magnitude_phase_response(self):
+        self.filter_magnitude_response=[]
+        self.filter_phase_response =[]
         # update equation and return based on filter type and poles and zeros
+        num,den=sg.zpk2tf(self.filter_zeros,self.filter_poles, 1)
+        w,freq_resp=sg.freqz(num, den, SAMPLING_FREQ)
+        for h in freq_resp:
+            freqs=cmath.polar(h)
+            self.filter_magnitude_response.append(freqs[0])
+            self.filter_phase_response.append(freqs[1])
 
-        return self.filter_magnitude_response
+        return self.filter_magnitude_response, self.filter_phase_response , w, num, den
 
-    def get_phase_response(self):
-        # update equation and return based on filter type and poles and zeros
-        return self.filter_phase_response
 
     def get_impulse_response(self):
         # update equation and return based on filter type and poles and zeros

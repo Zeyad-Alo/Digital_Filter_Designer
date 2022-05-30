@@ -14,18 +14,7 @@ from apps.modules import filtercreator
 from scipy import signal as sg
 
 
-zeros_reals=[0]
-zeros_imags=[0]
-poles_reals=[0]
-poles_imags=[0]
-zeros_all=[]
-poles_all=[]
-zeros_all_conj=[]
-poles_all_conj=[]
-z_plane=[]
-mag_zeros=[]
-mag_imag=[]
-SAMPLING_FREQ=44100
+
 # intializing figures in order to update them later(their layouts)
 
 fig = go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
@@ -69,23 +58,7 @@ def zplane_plot():
     return fig
 
 
-# 
 
-def appending_zeros(zeros):
-    print("appending zeros")
-    zeros_all.append(zeros)
-    print(zeros_all)
-    zeros_reals.append(zeros.real)
-    print(zeros_reals)
-    zeros_imags.append(zeros.imag)
-    print(zeros_imags)
-    print("appending done")
-
-def appending_poles(poles):
-    print("appending poles")
-    poles_all.append(poles)
-    poles_reals.append(poles.real)
-    poles_imags.append(poles.imag)
 
 def updating_fig(data,x,y,symbol):
     print("updating zplot")
@@ -247,7 +220,8 @@ SAMPLING_FREQ=44100
     Output("z_plane", "figure"),
     Output("mag_response", "figure"),
     Output("phase_response", "figure"),
-
+    Output("store_num", "data"),
+    Output("store_den", "data"),
 
     Input("add_button","n_clicks"),
     Input("mag_slider", "value"),
@@ -263,7 +237,7 @@ SAMPLING_FREQ=44100
 )
 
 def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,apply_click,activated,zclicks,pclicks,allclicks):
-    
+    #TODO: return the num and den since its needed for the other tabs
  # this is initialized in order to know which button is pressed
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
     # theta value and mag value are taken from the sliders
@@ -271,33 +245,25 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
     #this loop is entred when both the zeros button is open and the user pressed add
     if z_active and 'add_button' in changed_id:
         print("zeros")
-        appending_zeros(z_axis)
+        filtercreator.Filter.add_zero(z_axis)
         
-        updating_fig(1,zeros_reals,zeros_imags,'circle-open')
-        print(zeros_reals)
+        updating_fig(1,self.filter_zeros.real,self.filter_zeros.imag,'circle-open')
+ 
         
         #this loop is entred when both the poles button is open and the user pressed add
     elif p_active and 'add_button' in changed_id:
         print("poles")
-        appending_poles(z_axis)
+        filtercreator.Filter.add_pole( z_axis)
 
-        updating_fig(2,poles_reals,poles_imags,'x-open')
+        updating_fig(2,self.filter_poles.real,self.filter_poles.imag,'x-open')
 
     
     if 'add_button' in changed_id:  
         print("phase and mag resp")
-        mag=[]
-        phase=[]
-        num,den=sg.zpk2tf(zeros_all, poles_all, 1)
-        w,freq_resp=sg.freqz(num, den, fs=SAMPLING_FREQ)
-        for h in freq_resp:
-            polar=cmath.polar(h)
-            mag.append(polar[0])
-            phase.append(polar[1])
+        magnitude_response,phase_response,w=filtercreator.Filter.get_magnitude_phase_response()
+        updating_fig2(0,w,magnitude_response)
         
-        updating_fig2(0,w,mag)
-        
-        updating_fig3(0,w,phase)
+        updating_fig3(0,w,phase_response)
     
 
     if activated and 'apply_button' in changed_id  :  
@@ -305,8 +271,8 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         mag=[]
         phase=[]
         print("activated and apply_button")
-        for z1 in zeros_all:
-            for z2 in zeros_all:
+        for z1 in self.filter_poles:
+            for z2 in self.filter_poles:
                 print("z1:")
                 print(z1)
                 print("z2")
@@ -331,103 +297,63 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
                     poles_all_conj.append(p_conj)
         
         for z in zeros_all_conj:
-            appending_zeros(z)
+            filtercreator.Filter.add_zero(z)
 
         for p in poles_all_conj:
-            appending_poles(p)
+            filtercreator.Filter.add_pole(p)
 
-        num,den=sg.zpk2tf(zeros_all, poles_all, 1)
-        w,freq_resp=sg.freqz(num, den, fs=SAMPLING_FREQ)
-        for h in freq_resp:
-            polar=cmath.polar(h)
-            mag.append(polar[0])
-            phase.append(polar[1])
+        magnitude_response,phase_response,w,num,den=filtercreator.Filter.get_magnitude_phase_response()
         
-        updating_fig(1,zeros_reals,zeros_imags,'circle-open')
-        updating_fig(2,poles_reals,poles_imags,'x-open')
-        updating_fig2(0,w,mag)
-        updating_fig3(0,w,phase)
+        updating_fig(1,self.filter_zeros.real,self.filter_zeros.imag,'circle-open')
+        updating_fig(2,self.filter_poles.real,self.filter_poles.imag,'x-open')
+
+        updating_fig2(0,w,magnitude_response)
+        updating_fig3(0,w,phase_response)
     
 
 
-    #if 'dropdown_zeros' in changed_id:
-    #    print("zeros_clear")
-    #    print(zeros_all)
-    #    zeros_all=[]
-    #    zeros_reals=[0]
-    #    zeros_imags=[0]
-    #    print(zeros_all)
-    #    print(zeros_reals)
-    #    print(zeros_imags)
-    #    print("removed all zeros")
-    #    updating_fig(1,zeros_reals,zeros_imags,'circle-open')
+    if 'dropdown_zeros' in changed_id:
+        print("zeros_clear")
+        for z in self.filter_zeros:
+            filtercreator.Filter.remove_zero(z)
 
-    #    mag=[]
-    #    phase=[]
-    #    num,den=sg.zpk2tf(zeros_all, poles_all, 1)
-    #    w,freq_resp=sg.freqz(num, den, fs=SAMPLING_FREQ)
-    #    for h in freq_resp:
-    #        polar=cmath.polar(h)
-    #        mag.append(polar[0])
-    #        phase.append(polar[1])
+        magnitude_response,phase_response,w,num,den=filtercreator.Filter.get_magnitude_phase_response()
+        updating_fig(1,self.filter_zeros.real,self.filter_zeros.imag,'circle-open')
+        updating_fig(2,self.filter_poles.real,self.filter_poles.imag,'x-open')
+
+        updating_fig2(0,w,magnitude_response)
+        updating_fig3(0,w,phase_response)
+    elif 'dropdown_poles' in changed_id:
+        print("poles_clear")
+        for p in self.filter_poles:
+            filtercreator.Filter.remove_pole(p)
+
+        magnitude_response,phase_response,w,num,den=filtercreator.Filter.get_magnitude_phase_response()
+        updating_fig(1,self.filter_zeros.real,self.filter_zeros.imag,'circle-open')
+        updating_fig(2,self.filter_poles.real,self.filter_poles.imag,'x-open')
+
+        updating_fig2(0,w,magnitude_response)
+        updating_fig3(0,w,phase_response)
+
+    elif 'dropdown_all' in changed_id:
+        for z in self.filter_zeros:
+            filtercreator.Filter.remove_zero(z)
+        for p in self.filter_poles:
+            filtercreator.Filter.remove_pole(p)
         
-    #    updating_fig2(0,w,mag)
-        
-    #    updating_fig3(0,w,phase)
+        magnitude_response,phase_response,w,num,den=filtercreator.Filter.get_magnitude_phase_response()
+        updating_fig(1,self.filter_zeros.real,self.filter_zeros.imag,'circle-open')
+        updating_fig(2,self.filter_poles.real,self.filter_poles.imag,'x-open')
 
-    #elif 'dropdown_poles' in changed_id:
-    #    print("poles_clear")
-    #    for p in poles_all:
-    #        poles_all.remove(p)
-    #    for p in poles_reals:
-    #        poles_reals.remove(p)
-    #    for p in poles_imags:
-    #        poles_imags.remove(p)
-    #    updating_fig(2,0,0,'x-open')
-
-
-
-
-    #    mag=[]
-    #    phase=[]
-    #    num,den=sg.zpk2tf(zeros_all, poles_all, 1)
-    #    w,freq_resp=sg.freqz(num, den, fs=SAMPLING_FREQ)
-    #    for h in freq_resp:
-    #        polar=cmath.polar(h)
-    #        mag.append(polar[0])
-    #        phase.append(polar[1])
-        
-    #    updating_fig2(0,w,mag)
-        
-    #    updating_fig3(0,w,phase)
-
-
-    #elif 'dropdown_all' in changed_id:
-    #    print("clear_all")
-    #    for z in zeros_all:
-    #        zeros_all.remove(z)
-    #    for z in zeros_reals:
-    #        zeros_reals.remove(z)
-    #    for z in zeros_imags:
-    #        zeros_imags.remove(z)
-    #    updating_fig(1,0,0,'circle-open')
-    #    for p in poles_all:
-    #        poles_all.remove(p)
-    #    for p in poles_reals:
-    #        poles_reals.remove(p)
-    #    for p in poles_imags:
-    #        poles_imags.remove(p)
-    #    pdating_fig(2,0,0,'x-open')
-    #    updating_fig2(0,0,0)
-    #    updating_fig3(0,0,0)
-
+        updating_fig2(0,w,magnitude_response)
+        updating_fig3(0,w,phase_response)
 
 
     print("here")
     
 
     # we return the figure in the "figure =" of zplot (find z plot card)
-    return fig,fig2,fig3
+    return fig,fig2,fig3,num,den
 
 
 

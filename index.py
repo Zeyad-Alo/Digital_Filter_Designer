@@ -16,7 +16,7 @@ app.layout = dbc.Container(
                     "Digital Filter Designer",
                     className="text-center bg-dark text-white p-2",
                 ),
-        create_home_page(),
+        create_home_page(),dcc.Store(id='store_num'),dcc.Store(id='store_den')
     ],
     className="p-0",
     
