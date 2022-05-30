@@ -54,6 +54,7 @@ def zplane_plot():
     #data 2 for poles points
     fig.add_scatter(x=[0],y=[0],mode="markers")
     fig.data[2].marker.symbol = 'x-open'
+    fig.update(layout_showlegend=False)
     # this is returned in the 'figure=' of the zplane plot (look for the z plane card)
     return fig
 
@@ -82,7 +83,7 @@ def updating_fig3(data,x,y):
 zplane_card = dbc.Card(
     [
         dbc.CardHeader("Z-Plane"),
-        dbc.CardBody(dcc.Graph(id='z_plane', figure= zplane_plot(), className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='z_plane', figure= zplane_plot()), className = "p-0"
     )],
     )
 
