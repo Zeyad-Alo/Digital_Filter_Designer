@@ -354,7 +354,8 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
     
 
     # we return the figure in the "figure =" of zplot (find z plot card)
-    return fig,fig2,fig3,num,den
+    #changing the array to list so the data in store id is right
+    return fig,fig2,fig3,num.tolist(),den.tolist()
 
 
 

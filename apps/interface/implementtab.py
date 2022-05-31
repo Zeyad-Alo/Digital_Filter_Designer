@@ -43,7 +43,7 @@ filtered_signal_card = dbc.Card(
         dbc.CardFooter(
             dbc.Row([
                 dbc.Col(dcc.Markdown('Speed', className="p-0"), width=1),
-                dbc.Col(dcc.Slider(0, 100, value=100, marks=None, id = 'speed_slider',
+                dbc.Col(dcc.Slider(,1 100, value=100, marks=None, id = 'speed_slider',
     tooltip={"placement": "bottom", "always_visible": False}, className="p-0"), style={'padding-top':'8px'})
                 ]),
             )
@@ -68,7 +68,11 @@ def implement_tab_layout():
         dbc.Row(nav),
         dbc.Row(original_signal_card),
         html.Br(),
-        dbc.Row(filtered_signal_card),
+        dbc.Row(filtered_signal_card),dcc.Interval(
+            id='interval_component',
+            interval=1*1000, # in milliseconds
+            n_intervals=0
+        ),
         ],            
                       )
     return layout
@@ -85,25 +89,62 @@ def updating_fig5(data,x,y):
     scatter.x = list(x)
     scatter.y = list(y)
 
-#call back for filterd signal
+def parse_contents(contents, filename, date):
+    pd.options.display.max_rows = 100000
 
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+    try:
+        if 'csv' in filename:
+            # Assume that the user uploaded a CSV file
+            df = pd.read_csv(
+                io.StringIO(decoded.decode('utf-8')))
+        elif 'xls' in filename:
+            # Assume that the user uploaded an excel file
+            df = pd.read_excel(io.BytesIO(decoded))
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file not csv or xls.'
+        ])
+
+    return  df.loc[:,0].to_numpy() , df.loc[:,1].to_numpy()
+
+
+#callback for uploading data
 @app.callback(
     Output("original_signal", "figure"),
     Output("filtered_signal", "figure"),
    
+
+
+    Input("upload_data", "contents"),
+    Input("upload_data", "filename"),
+    Input("upload_data", "last_modified"),
     Input("store_num", "data"),
     Input("store_den", "data"),
+    Input("speed_slider", "value"),
+    Input("interval_component", "n_intervals")
 
 )
 
-def Signal_filtered_update(num,den):
- 
-    filterd_output=sg.lfilter(num,den,signal)
-    updating_fig4(data,x,y):
-    updating_fig5(0,filterd_output,y):
-   
-    return fig4,fig5
+def Signal_update(contents,filename,last_modified,num,den,speed,n):
+    #TODO DONT FORGET TIME PROGRESS
+    if contents is not None:
+        time,mag = [
+            parse_contents(c, n, d) for c, n, d in
+            zip(contents, filename, last_modified)]
 
+        num_array=np.asarray(num)
+        den_array=np.asarray(den)
+        filterd_signal=sg.lfilter(num_array,den_array,mag)
+        # len(time) will tell me how many sampels do i have 
+        print(len(time))
+        self.pointsToAppend += 50*speed
+        updating_fig4(0,time[:pointsToAppend],mag[:pointsToAppend])
+        updating_fig5(0,time[:pointsToAppend],filterd_signal[:pointsToAppend])
+    return  fig4,fig5
 
 
 

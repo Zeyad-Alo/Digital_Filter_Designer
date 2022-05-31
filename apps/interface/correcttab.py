@@ -11,18 +11,6 @@ from apps.interface.designtab import plot
 
 
 
-zeros_reals=[0]
-zeros_imags=[0]
-poles_reals=[0]
-poles_imags=[0]
-zeros_all=[]
-poles_all=[]
-zeros_all_conj=[]
-poles_all_conj=[]
-z_plane=[]
-mag_zeros=[]
-mag_imag=[]
-SAMPLING_FREQ=44100
 
 fig = go.FigureWidget(layout=dict(template='plotly_dark', height = 200, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 fig2= go.FigureWidget(layout=dict(template='plotly_dark', height = 200, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
@@ -43,10 +31,10 @@ def allpass_zplane_plot():
     fig.add_scatter(x=x,y=y,mode="lines")
     
     # data 1 for zeros points
-    fig.add_scatter(x=[zeros_reals],y=[zeros_imags],mode="markers")
+    fig.add_scatter(x=[0],y=[0],mode="markers")
     fig.data[1].marker.symbol = 'circle-open'
     #data 2 for poles points
-    fig.add_scatter(x=[poles_reals],y=[poles_imags],mode="markers")
+    fig.add_scatter(x=[0],y=[0],mode="markers")
     fig.data[2].marker.symbol = 'x-open'
     fig.update(layout_showlegend=False)
     # this is returned in the 'figure=' of the zplane plot (look for the z plane card)
@@ -117,7 +105,7 @@ def plot_3():
 corrected_phase_card = dbc.Card(
     [
         dbc.CardHeader("Corrected Phase Response"),
-        dbc.CardBody(dcc.Graph(id='original_signal', figure=plot_3()), className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='original_signal', figure=plot_2()), className = "p-0"),
     ],
     style={'padding-right': '0', 'padding-left': '0'}
 )
