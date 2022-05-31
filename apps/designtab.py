@@ -1,7 +1,6 @@
 from dash import dcc, ctx
 from dash import html
 from dash import callback_context
-from apps.navbar import create_navbar
 import dash_bootstrap_components as dbc
 import plotly.express as px
 from app import app

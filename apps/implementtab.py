@@ -1,13 +1,12 @@
 from dash import dcc, ctx
 from dash import html
-from apps.navbar import create_navbar
 import dash_bootstrap_components as dbc
 import plotly.express as px
 from app import app
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
-from apps.interface.designtab import plot
+from apps.designtab import plot
 from scipy import signal as sg
 
 fig4= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
@@ -43,7 +42,7 @@ filtered_signal_card = dbc.Card(
         dbc.CardFooter(
             dbc.Row([
                 dbc.Col(dcc.Markdown('Speed', className="p-0"), width=1),
-                dbc.Col(dcc.Slider(,1 100, value=100, marks=None, id = 'speed_slider',
+                dbc.Col(dcc.Slider(1, 100, value=100, marks=None, id = 'speed_slider',
     tooltip={"placement": "bottom", "always_visible": False}, className="p-0"), style={'padding-top':'8px'})
                 ]),
             )
