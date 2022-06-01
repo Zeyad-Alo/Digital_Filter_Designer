@@ -43,7 +43,7 @@ filtered_signal_card = dbc.Card(
         dbc.CardFooter(
             dbc.Row([
                 dbc.Col(dcc.Markdown('Speed', className="p-0"), width=1),
-                dbc.Col(dcc.Slider(,1 100, value=100, marks=None, id = 'speed_slider',
+                dbc.Col(dcc.Slider(1, 100, value=100, marks=None, id = 'speed_slider',
     tooltip={"placement": "bottom", "always_visible": False}, className="p-0"), style={'padding-top':'8px'})
                 ]),
             )
@@ -56,7 +56,7 @@ filtered_signal_card = dbc.Card(
 
 nav = dbc.Nav(
     [
-        dbc.NavItem(dcc.Upload(dbc.Button('Upload File', size="sm")),
+        dbc.NavItem(dcc.Upload(dbc.Button('Upload File',id='upload', size="sm")),
 ),
     ]
 )
@@ -90,7 +90,7 @@ def updating_fig5(data,x,y):
     scatter.y = list(y)
 
 def parse_contents(contents, filename, date):
-    pd.options.display.max_rows = 100000
+    pd.options.display.max_rows = 10000
 
     content_type, content_string = contents.split(',')
 
@@ -108,7 +108,8 @@ def parse_contents(contents, filename, date):
         return html.Div([
             'There was an error processing this file not csv or xls.'
         ])
-
+    print(df.loc[:,0].to_numpy())
+    print(df.loc[:,1].to_numpy())
     return  df.loc[:,0].to_numpy() , df.loc[:,1].to_numpy()
 
 
@@ -119,31 +120,48 @@ def parse_contents(contents, filename, date):
    
 
 
-    Input("upload_data", "contents"),
-    Input("upload_data", "filename"),
-    Input("upload_data", "last_modified"),
-    Input("store_num", "data"),
-    Input("store_den", "data"),
+    Input('upload', 'contents'),
+    State('upload', 'filename'),
+    State('upload', 'last_modified'),
+
+    Input("store_num_real", "data"),
+    Input("store_num_imag", "data"),
+    Input("store_den_real", "data"),
+    Input("store_den_imag", "data"),
+
     Input("speed_slider", "value"),
-    Input("interval_component", "n_intervals")
+    
 
 )
 
-def Signal_update(contents,filename,last_modified,num,den,speed,n):
+def Signal_update(contents,filename,last_modified,num_real,num_imag,den_real,den_imag,speed):
     #TODO DONT FORGET TIME PROGRESS
+    num=[]
+    den=[]
+    print("here")
     if contents is not None:
+        print("there is data")
         time,mag = [
             parse_contents(c, n, d) for c, n, d in
             zip(contents, filename, last_modified)]
+        print(time)
+        print(mag)
 
-        num_array=np.asarray(num)
-        den_array=np.asarray(den)
-        filterd_signal=sg.lfilter(num_array,den_array,mag)
+        for i,r in enumerate(num_real):
+            num.append(r + num_imag[i]*1j)
+      
+        for i,r in enumerate(den_real):
+            den.append(r + den_imag[i]*1j)
+
+        print(num)
+        print(den)
+        filterd_signal=sg.lfilter(num,den,mag)
         # len(time) will tell me how many sampels do i have 
         print(len(time))
         self.pointsToAppend += 50*speed
         updating_fig4(0,time[:pointsToAppend],mag[:pointsToAppend])
         updating_fig5(0,time[:pointsToAppend],filterd_signal[:pointsToAppend])
+    print("here2")
     return  fig4,fig5
 
 
