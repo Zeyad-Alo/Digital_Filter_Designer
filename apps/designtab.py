@@ -128,9 +128,9 @@ options_card = dbc.Card(
         dbc.CardFooter(
         dbc.Row([
             dbc.Col(dbc.Switch(id = 'conj_checklist', label = "Add Conjugates")),
-            dbc.Col(dbc.Button("Apply!", id = 'apply_button', color="primary", size='sm'), width=3),
+            dbc.Col(dbc.Button(html.I(className="bi bi-trash-fill"), id = 'delete_button', color="dark", size='sm'), width=1),
             ]),
-        style={'padding-left': '10px', 'padding-right':'20px'}
+        style={'padding-left': '10px', 'margin-right':'20px'}
     )],
 )
 
@@ -206,7 +206,7 @@ SAMPLING_FREQ=44100
     Input("theta_slider", "value"),
     State("zeros_button", "active"),
     State("poles_button", "active"),
-    Input("apply_button","n_clicks"),
+    Input("delete_button","n_clicks"),
     Input("conj_checklist","value"),
     Input("dropdown_zeros","n_clicks"),
     Input("dropdown_poles","n_clicks"),
