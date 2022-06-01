@@ -188,13 +188,18 @@ def add_allpass_to_list(value, n_clicks, custom_value, delete_n_clicks, children
         children.append(dbc.ListGroupItem(custom_value, id={'item':str(n_clicks)}, style={'color':'black'}, action=True, active=False))
     elif value != "6" and button_id == "add_allpass_button":
         children.append(dbc.ListGroupItem(value, id={'item':str(n_clicks)}, style={'color':'black'}, action=True, active=False))
+        print("3ayel")
     if button_id == "delete_button":
+        assassin_child = []
+        print(children)
         for i in children:
-            if i["active"]:
-                children.remove(i)
+            print(i['props']['active'])
+            if i['props']['active']:
+                assassin_child.append(i)
+        for i in assassin_child:
+            children.remove(i)
 
-    if n_clicks: all_pass_filters_ids.append(str(n_clicks))
-    print(all_pass_filters_ids)
+
     print(n_clicks)
     return children
 
