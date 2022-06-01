@@ -329,46 +329,62 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
     
 
 
-    #if 'dropdown_zeros' in changed_id:
-    #    print("zeros_clear")
-    #    for z in filter.filter_zeros:
-    #        filter.remove_zero(z)
+    if 'dropdown_zeros' in changed_id:
+        print("zeros_clear")
+        for z in filter.filter_zeros:
+            filter.remove_zero(z)
 
-    #    magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
-    #    updating_fig(1,filter.filter_zeros.real,filter.filter_zeros.imag,'circle-open')
-    #    updating_fig(2,filter.filter_poles.real,filter.filter_poles.imag,'x-open')
+        print(filter.filter_zeros)
+        filter.edit_zero(0,0)
+        print(filter.filter_zeros)
 
-    #    updating_fig2(0,w,magnitude_response)
-    #    updating_fig3(0,w,phase_response)
-    #elif 'dropdown_poles' in changed_id:
-    #    print("poles_clear")
-    #    for p in filter.filter_poles:
-    #        filter.remove_pole(p)
+        magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
+        updating_fig(1,np.real(filter.filter_zeros),np.imag(filter.filter_zeros),'circle-open')
+        updating_fig(2,np.real(filter.filter_poles),np.imag(filter.filter_poles),'x-open')
 
-    #    magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
-    #    updating_fig(1,filter.filter_zeros.real,filter.filter_zeros.imag,'circle-open')
-    #    updating_fig(2,filter.filter_poles.real,filter.filter_poles.imag,'x-open')
+        updating_fig2(0,w,magnitude_response)
+        updating_fig3(0,w,phase_response)
 
-    #    updating_fig2(0,w,magnitude_response)
-    #    updating_fig3(0,w,phase_response)
+    elif 'dropdown_poles' in changed_id:
+        print("poles_clear")
+        for p in filter.filter_poles:
+            filter.remove_pole(p)
 
-    #elif 'dropdown_all' in changed_id:
-    #    for z in filter.filter_zeros:
-    #        filter.remove_zero(z)
-    #    for p in filter.filter_poles:
-    #        filter.remove_pole(p)
+        print(filter.filter_poles)
+        filter.edit_pole(0,0)
+        print(filter.filter_poles)
+        magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
+        updating_fig(1,np.real(filter.filter_zeros),np.imag(filter.filter_zeros),'circle-open')
+        updating_fig(2,np.real(filter.filter_poles),np.imag(filter.filter_poles),'x-open')
+
+        updating_fig2(0,w,magnitude_response)
+        updating_fig3(0,w,phase_response)
+
+    elif 'dropdown_all' in changed_id:
+        for z in filter.filter_zeros:
+            filter.remove_zero(z)
+        for p in filter.filter_poles:
+            filter.remove_pole(p)
         
-    #    magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
-    #    updating_fig(1,filter.filter_zeros.real,filter.filter_zeros.imag,'circle-open')
-    #    updating_fig(2,filter.filter_poles.real,filter.filter_poles.imag,'x-open')
 
 
-    #    updating_fig2(0,w,magnitude_response)
-    #    updating_fig3(0,w,phase_response)
+        filter.edit_zero(0,0)
+        print(filter.filter_zeros)
+
+        filter.edit_pole(0,0)
+        print(filter.filter_poles)
+
+        magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
+        updating_fig(1,np.real(filter.filter_zeros),np.imag(filter.filter_zeros),'circle-open')
+        updating_fig(2,np.real(filter.filter_poles),np.imag(filter.filter_poles),'x-open')
+
+
+        updating_fig2(0,w,magnitude_response)
+        updating_fig3(0,w,phase_response)
 
 
     print("here")
-    real_num,imag_num,real_den,imag_den
+    # for storing DASH CANNOT PROCESS COMPLEX NUMBERS
     if len(num) == 0 and len(den) ==0:
         print("list data")
         print(type(real_num))
@@ -422,7 +438,7 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
 
         updating_fig2(0,w,magnitude_response)
         updating_fig3(0,w,phase_response)
-  
+    clicked_data = None
 
     # we return the figure in the "figure =" of zplot (find z plot card)
     #changing the array to list so the data in store id is right
