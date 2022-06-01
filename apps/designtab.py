@@ -50,7 +50,7 @@ def init_zplane_plot():
 
 ####################################### ADDED FUNCTIONS (AS :) ) #######################################
 
-def updating_figure(figure=None,data_index=0,x=0,y=0,symbol='circle-open'):
+def updating_figure_desgin(figure=None,data_index=0,x=[],y=[],symbol='circle-open'):
     scatter=figure.data[data_index]
     scatter.x=list(x)
     scatter.y=list(y)
@@ -59,11 +59,11 @@ def updating_figure(figure=None,data_index=0,x=0,y=0,symbol='circle-open'):
     
 def updating_all_figures(): 
     magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
-    updating_figure(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
-    updating_figure(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
+    updating_figure_desgin(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
+    updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
 
-    updating_figure(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
-    updating_figure(figure=phase_fig,data_index=0,x=w,y=phase_response)   
+    updating_figure_desgin(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
+    updating_figure_desgin(figure=phase_fig,data_index=0,x=w,y=phase_response)   
 
 
 #   PS: CARDS ARE UI ELEMENTS ONLY THE ORGANIZE FUNCTIONAL CONTENT
@@ -234,21 +234,21 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         print("zeros")
         filter.add_zero(z_axis)
         
-        updating_figure(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
+        updating_figure_desgin(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
         #this loop is entred when both the poles button is open and the user pressed add
     elif p_active and 'add_button' in changed_id:
         print("poles")
         filter.add_pole( z_axis)
 
-        updating_figure(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
+        updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
 
 
     if 'add_button' in changed_id:  
         print("phase and mag resp")
         magnitude_response,phase_response,w,num,den = filter.get_magnitude_phase_response() 
-        updating_figure(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
+        updating_figure_desgin(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
         
-        updating_figure(figure=phase_fig,data_index=0,x=w,y=phase_response)
+        updating_figure_desgin(figure=phase_fig,data_index=0,x=w,y=phase_response)
     
     if activated and 'apply_button' in changed_id  :  
         #TODO PHASE/MAG RESPONSE GETS UPDATED EVEN IF THERE ALL CONJUGETS ARE PRESENT
@@ -321,7 +321,7 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         
 
 #/why edit used ?
-        filter.edit_zero(0,)
+        filter.edit_zero(0,0)
         print(filter.filter_zeros)
 
         filter.edit_pole(0,1+1j)
@@ -351,10 +351,9 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
 
         real_den=np.real(den)
         imag_den=np.imag(den)
-#////////////////////////////// hena bt-addhom le list ezai same name ?
+
         real_num=real_num.tolist()
         imag_num=imag_num.tolist()
-
 
         real_den=real_den.tolist()
         imag_den=imag_den.tolist()
@@ -374,9 +373,9 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         data=clicked_data['points'][0]['curveNumber']
         y=clicked_data['points'][0]['y']
         x=clicked_data['points'][0]['x']
-        if data ==1 :
+        if data == 1:
             filter.remove_zero(x+y*1j)
-        elif data==2:
+        elif data == 2:
             filter.remove_pole(x+y*1j)
 
         updating_all_figures()

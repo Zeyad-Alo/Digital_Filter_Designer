@@ -48,6 +48,7 @@ class Filter():
 
         return self.filter_magnitude_response, self.filter_phase_response , w, num, den
 
+    
 
     def get_impulse_response(self):
         # update equation and return based on filter type and poles and zeros
