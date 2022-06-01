@@ -1,12 +1,15 @@
 import math
+import cmath
 from scipy import signal as sg
+
 class Filter():
-    def __init__(self, name, type, poles=[], zeros=[]):
-        self.name = name
+   
+    def __init__(self, poles=[], zeros=[]):
+        self.name = None
         self.filter_type = None
         self.filter_poles = poles
         self.filter_zeros = zeros
-        SAMPLING_FREQ=44100
+        self.sampling_freq=44100
 
     def add_pole(self, pole):
         self.filter_poles.append(pole)
@@ -21,7 +24,7 @@ class Filter():
         self.filter_zeros.remove(zero)
 
     def edit_pole(self, pole, new_pole):
-        self.filter_poles[pole] = new_pole
+        self.filter_poles[pole] = new_pole 
 
     def edit_zero(self, zero, new_zero):
         self.filter_zeros[zero] = new_zero
@@ -31,13 +34,13 @@ class Filter():
             self.filter_type = "FIR"
         else :
             self.filter_type = "IIR"
-
+    
     def get_magnitude_phase_response(self):
         self.filter_magnitude_response=[]
         self.filter_phase_response =[]
         # update equation and return based on filter type and poles and zeros
         num,den=sg.zpk2tf(self.filter_zeros,self.filter_poles, 1)
-        w,freq_resp=sg.freqz(num, den, SAMPLING_FREQ)
+        w,freq_resp=sg.freqz(num, den, self.sampling_freq)
         for h in freq_resp:
             freqs=cmath.polar(h)
             self.filter_magnitude_response.append(freqs[0])
@@ -55,10 +58,7 @@ class Filter():
         filtered_samples = []
         return filtered_samples
 
-    def generate_filter_file(self):
-        # generate filter file.txt
-        # contains coefficients of filter?? idk
-        return None
+
     def system_gain(self):
         # calculating the gain of the system mag response
         pass

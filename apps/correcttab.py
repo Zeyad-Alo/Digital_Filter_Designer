@@ -12,12 +12,12 @@ from scipy import signal as sg
 
 
 
-
 fig = go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 fig2= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 0, margin_r = 20, margin_t = 40))
 fig3= go.FigureWidget(layout=dict(template='plotly_dark', height = 400, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 
 all_pass_filters_ids = []
+
 
 
 #---------------------------------------------ZPLANE------------------------------------------------------------------
@@ -33,6 +33,7 @@ def allpass_zplane_plot():
     #data 0 for the unit circle 
     fig.add_scatter(x=x,y=y,mode="lines")
     fig.update_xaxes(scaleanchor="y")
+  
     # data 1 for zeros points
     fig.add_scatter(x=[0],y=[0],mode="markers")
     fig.data[1].marker.symbol = 'circle-open'
@@ -62,12 +63,12 @@ def plot_2():
 #------------------------------------------------------------------------------------------------------------------------------
 
 
-
 custom_card = dbc.Collapse(
             dbc.Input(placeholder="Enter desired 'a' value", id="custom_allpass_input", type="number", min=-0.99, max=0.99, step=0.01, style={'background-color':'black'}),
             id="custom_allpass",
             is_open=False,
         )
+
 
 
 
@@ -93,17 +94,9 @@ allpass_filters_lib_card = dbc.Card(
             dbc.Col(dbc.Button(html.I(className="bi bi-trash-fill"), id = 'delete_button', color="dark", size='sm'), width = 1),
             ]),),
         dbc.CardBody([custom_card, dbc.ListGroup([], id="allpass_list")], style={'padding-right': '0', 'padding-left': '0', 'padding-top': '0', 'padding-bottom': '0'}),
-
     ],
     style={'padding-right': '0', 'padding-left': '0', 'margin-left': '0'},
 )
-
-
-#-----------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
 
 all_pass_card = dbc.Card(
     [
@@ -126,7 +119,8 @@ def plot_3():
 corrected_phase_card = dbc.Card(
     [
         dbc.CardHeader("Corrected Phase Response"),
-        dbc.CardBody(dcc.Graph(id='original_signal', figure=plot_3()), className = "p-0"),
+
+        dbc.CardBody(dcc.Graph(id='original_signal', figure=plot_3()), className = "p-0")
     ],
     style={'padding-right': '0', 'padding-left': '0'}
 )
@@ -140,10 +134,8 @@ def correct_tab_layout():
             dbc.Col(all_pass_card),
             dbc.Col(corrected_phase_card)
             ])
-        ],            
-                      )
+        ],)
     return layout
-
 
 
 @app.callback(
