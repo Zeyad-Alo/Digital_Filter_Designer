@@ -2,7 +2,6 @@ from dash import dcc, ctx
 from dash import html
 from dash import callback_context
 from zmq import SCATTER
-from apps.navbar import create_navbar
 import dash_bootstrap_components as dbc
 import plotly.express as px
 from app import app
@@ -53,7 +52,8 @@ def init_zplane_plot():
 
 
 
-################################################################### ADDED FUNCTIONS (AS :))
+####################################### ADDED FUNCTIONS (AS :) ) #######################################
+
 def updating_figure(figure=None,data_index=0,x=0,y=0,symbol='circle-open'):
     scatter=figure.data[data_index]
     scatter.x=list(x)
@@ -61,7 +61,7 @@ def updating_figure(figure=None,data_index=0,x=0,y=0,symbol='circle-open'):
     if figure==z_plane_fig:
         scatter.marker.symbol=symbol
     
-def updating_all_figures():
+def updating_all_figures(): 
     magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
     updating_figure(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
     updating_figure(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')

@@ -1,15 +1,14 @@
 from dash import dcc, ctx
 from dash import html
-from apps.navbar import create_navbar
 import dash_bootstrap_components as dbc
 import plotly.express as px
 from app import app
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
-from apps.interface.designtab import design_tab_layout
-from apps.interface.implementtab import implement_tab_layout
-from apps.interface.correcttab import correct_tab_layout
+from apps.designtab import design_tab_layout
+from apps.implementtab import implement_tab_layout
+from apps.correcttab import correct_tab_layout
 
 
 
