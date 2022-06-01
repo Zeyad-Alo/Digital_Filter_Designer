@@ -229,84 +229,55 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
     z_axis=cmath.rect(mag_value,(theta_value*np.pi/180))
     #this loop is entred when both the zeros button is open and the user pressed add
     if z_active and 'add_button' in changed_id:
-        print("zeros")
+        #print("zeros")
         filter.add_zero(z_axis)
         
         updating_figure_desgin(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
         #this loop is entred when both the poles button is open and the user pressed add
     elif p_active and 'add_button' in changed_id:
-        print("poles")
+        #print("poles")
         filter.add_pole( z_axis)
-
+        print("THHHHHHHHHe filter")
+        # print(filter.get_filter_dict())
         updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
 
 
     if 'add_button' in changed_id:  
-        print("phase and mag resp")
+        #print("phase and mag resp")
         magnitude_response,phase_response,w,num,den = filter.get_magnitude_phase_response() 
         updating_figure_desgin(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
         
         updating_figure_desgin(figure=phase_fig,data_index=0,x=w,y=phase_response)
     
-    if activated and 'apply_button' in changed_id  :  
-        #TODO PHASE/MAG RESPONSE GETS UPDATED EVEN IF THERE ALL CONJUGETS ARE PRESENT
-        mag=[]
-        phase=[]
-        print("activated and apply_button")
-        for z1 in filter.filter_zeros:
-            for z2 in filter.filter_zeros:
-                print("z1:")
-                print(z1)
-                print("z2")
-                print(z2)
-                #if the conjugets of the elements are present
-                if( (z1.real == z2.real )and( z2.imag == - z1.imag) ):
-                    print("zeros same")
-                    break
-                else:
-                    print("zeros not same")
-                    z_conj=np.conj(z1) 
-                    print(z_conj)
-                    zeros_all_conj.append(z_conj)
-     
-        for p1 in filter.filter_poles:
-            for p2 in filter.filter_poles:
-                #if the conjugets of the elements are present
-                if (p1.real == p2.real )and( p2.imag == - p1.imag):
-                    break
-                else:
-                    p_conj=np.conj(p1)
-                    poles_all_conj.append(p_conj)
-        
-        for z in zeros_all_conj:
-            filter.add_zero(z)
-
-        for p in poles_all_conj:
-            filter.add_pole(p)
-
+    if activated :  
+        print("enabled  TRUE")
+        filter.enable_conjugates(True)
+        updating_all_figures()
+    elif not activated  :
+        print("enabled  FALSE")
+        filter.enable_conjugates(False)
         updating_all_figures()
 
-
     if 'dropdown_zeros' in changed_id:
-        print("zeros_clear")
+        #print("zeros_clear")
         for z in filter.filter_zeros:
             filter.remove_zero(z)
 
-        print(filter.filter_zeros)
+        #print(filter.filter_zeros)
         filter.edit_zero(0,0)
-        print(filter.filter_zeros)
+        #print(filter.filter_zeros)
 
         updating_all_figures()
        
 
     elif 'dropdown_poles' in changed_id:
-        print("poles_clear")
+        #print("poles_clear")
         for p in filter.filter_poles:
             filter.remove_pole(p)
 
-        print(filter.filter_poles)
+        #print(filter.filter_poles)
         filter.edit_pole(0,0)
-        print(filter.filter_poles)
+        #print(filter.filter_poles)
         
         updating_all_figures()
         
@@ -320,29 +291,30 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
 
 #/why edit used ?
         filter.edit_zero(0,0)
-        print(filter.filter_zeros)
+        #print(filter.filter_zeros)
 
         filter.edit_pole(0,1+1j)
-        print(filter.filter_poles)
+        #print(filter.filter_poles)
 
         updating_all_figures()       
        
 
 
-    print("here")
+    #print("here")
     # for storing DASH CANNOT PROCESS COMPLEX NUMBERS
     if len(num) == 0 and len(den) ==0:
-        print("list data")
-        print(type(real_num))
-        print(type(real_den))
-        print(real_num)
-        print(real_den)
-        print(imag_num)
-        print(imag_den)
-    else:
-        print("numpy data")
-        print(num)
-        print(den)
+        #print("list data")
+        #print(type(real_num))
+        #print(type(real_den))
+        #print(real_num)
+        #print(real_den)
+        #print(imag_num)
+        #print(imag_den)
+   # else:
+        
+        #print("numpy data")
+        #print(num)
+        #print(den)
 
         real_num=np.real(num)
         imag_num=np.imag(num)
@@ -356,18 +328,18 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         real_den=real_den.tolist()
         imag_den=imag_den.tolist()
 
-        print(type(real_num))
-        print(type(real_den))
-        print(real_num)
-        print(real_den)
-        print(imag_num)
-        print(imag_den)
+        #print(type(real_num))
+        #print(type(real_den))
+        #print(real_num)
+        #print(real_den)
+        #print(imag_num)
+        #print(imag_den)
     
 
     if clicked_data is not None:
         #TODO: handle if the arrays of zeros and poles are empty
-        print("clicked data")
-        print(clicked_data)
+        #print("clicked data")
+        #print(clicked_data)
         data=clicked_data['points'][0]['curveNumber']
         y=clicked_data['points'][0]['y']
         x=clicked_data['points'][0]['x']

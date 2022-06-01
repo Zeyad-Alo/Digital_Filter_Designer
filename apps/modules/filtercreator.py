@@ -2,33 +2,33 @@ import cmath
 from numpy import conjugate
 from scipy import signal as sg
 from dataclasses import dataclass, asdict, field
-
+import copy
 
 @dataclass
 class Filter():
-    filter_poles: list = field(default_factory=list, repr=True, dict=True)
-    filter_zeros: list = field(default_factory=list, repr=True, dict=True)
+    filter_poles: list = field(default_factory=list, repr=True)
+    filter_zeros: list = field(default_factory=list, repr=True)
 
-    conjugate_enable: bool = field(default=False, repr=False, dict=False)
-    conjugate_poles: list = field(default_factory=list, repr=False, dict=False)
-    conjugate_zeros: list = field(default_factory=list, repr=False, dict=False)
+    conjugate_enable: bool = field(default=False, repr=False)
+    conjugate_poles: list = field(default_factory=list, repr=False)
+    conjugate_zeros: list = field(default_factory=list, repr=False)
     sampling_freq: int = 44100
-    filter_type: str = field(default_factory=list, repr=False, dict=False)
+    filter_type: str = field(default_factory=list, repr=False)
 
-    numerator: list = field(default_factory=list, repr=False, dict=False)
-    denominator: list = field(default_factory=list, repr=False, dict=False)
+    numerator: list = field(default_factory=list, repr=False)
+    denominator: list = field(default_factory=list, repr=False)
 
-    w: list = field(default_factory=list, repr=False, dict=False)
+    w: list = field(default_factory=list, repr=False)
     filter_freq_response: list = field(
-        default_factory=list, repr=False, dict=False)
+        default_factory=list, repr=False)
     filter_phase_response: list = field(
-        default_factory=list, repr=False, dict=False)
+        default_factory=list, repr=False)
     filter_magnitude_response: list = field(
-        default_factory=list, repr=False, dict=False)
+        default_factory=list, repr=False)
 
     def __post_init__(self):
         # check if filter already contains poles or zeros and update accordingly
-        if (self.filter_poles) > 0 or len(self.filter_zeros) > 0:
+        if len(self.filter_poles) > 0 or len(self.filter_zeros) > 0:
             self.update_filter_from_zeropole()
 
     # TODO dont forget to call this in the design tab???
@@ -55,11 +55,23 @@ class Filter():
 
     def update_conjugates(self):
         if self.conjugate_enable:
-            self.conjugate_poles = []
-            self.conjugate_zeros = []
-            for pole in self.filter_poles:
+            # self.conjugate_poles = []
+            # self.conjugate_zeros = []
+            print("filteeer afteeeeeeer")
+            print(self.filter_poles)
+            self.filter_poles=list(set(self.filter_poles).symmetric_difference(set(self.conjugate_poles)))
+            self.filter_zeros=list(set(self.filter_zeros).symmetric_difference(set(self.conjugate_zeros)))
+            print("filteeer beforeeee")
+            print(self.filter_poles)
+
+            temp_filter_poles=copy.copy(self.filter_poles)
+            temp_filter_zeros=copy.copy(self.filter_zeros)
+            print("temp_filter_poles                   ppppp")
+            print( temp_filter_poles)
+            
+            for pole in temp_filter_poles:
                 self.add_conjugate('Pole', pole)
-            for zero in self.filter_zeros:
+            for zero in  temp_filter_zeros:
                 self.add_conjugate('Zero', zero)
         else:
             for pole in self.conjugate_poles:
@@ -79,7 +91,7 @@ class Filter():
             self.add_conjugate(pole)
         else:
             self.filter_poles.append(pole)
-        self.update_conjugates()
+        # self.update_conjugates()
 
     # TODO
     def add_zero(self, zero):
@@ -87,21 +99,23 @@ class Filter():
             self.add_conjugate(zero)
         else:
             self.filter_zeros.append(zero)
-        self.update_conjugates()
+        # self.update_conjugates()
 
     # TODO
-    def add_conjugate(self, polezero='Pole', input=None):
-        if polezero == 'Pole':
+    def add_conjugate(self, pole_zero='Pole', input=None):
+        print("entered  add_conjgate")
+        if pole_zero == 'Pole':
             if input is None:
                 return
             self.conjugate_poles.append(conjugate(input))
             self.filter_poles.append(conjugate(input))
-        elif polezero == 'Zero':
+            return
+        elif pole_zero == 'Zero':
             if input is None:
                 return
             self.conjugate_zeros.append(conjugate(input))
             self.filter_zeros.append(conjugate(input))
-
+            return
     # DONE
 
     def enable_conjugates(self, boolean: bool = False):
