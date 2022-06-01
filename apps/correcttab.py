@@ -34,10 +34,10 @@ def allpass_zplane_plot():
     fig.update_xaxes(scaleanchor="y")
   
     # data 1 for zeros points
-    fig.add_scatter(x=[0],y=[0],mode="markers")
+    fig.add_scatter(x=[],y=[],mode="markers")
     fig.data[1].marker.symbol = 'circle-open'
     #data 2 for poles points
-    fig.add_scatter(x=[0],y=[0],mode="markers")
+    fig.add_scatter(x=[],y=[],mode="markers")
     fig.data[2].marker.symbol = 'x-open'
     fig.update(layout_showlegend=False)
     # this is returned in the 'figure=' of the zplane plot (look for the z plane card)
@@ -63,7 +63,7 @@ def plot_2():
 
 
 custom_card = dbc.Collapse(
-            dbc.Input(placeholder="Enter desired 'a' value", id="custom_allpass_input", type="number", min=-0.99, max=0.99, step=0.01, style={'background-color':'black'}),
+            dbc.Input(placeholder="Enter desired 'a' value", id="custom_allpass_input", type="text", style={'background-color':'black'}),
             id="custom_allpass",
             is_open=False,
         )
@@ -81,12 +81,18 @@ allpass_filters_lib_card = dbc.Card(
                     placeholder="Select desired all pass",
                     style={'background-color':'black'},
                     options=[
-                        {"label": "-0.99", "value": "-0.99"},
-                        {"label": "-0.49", "value": "-0.49"},
+                        {"label": "-0.9", "value": "-0.9"},
+                        {"label": "-0.5", "value": "-0.5"},
                         {"label": "0.0", "value": "0.0"},
-                        {"label": "0.49", "value": "0.49"},
-                        {"label": "0.99", "value": "0.99"},
-                        {"label": "Custom", "value": "6"},
+                        {"label": "0.5", "value": "0.5"},
+                        {"label": "0.9", "value": "0.9"},
+                        {"label": "0.5 + 0.5j", "value": "0.5+0.5j"},
+                        {"label": "1 + 0.5j", "value": "1+0.5j"},
+                        {"label": "1 + 1j", "value": "1+1j"},
+                        {"label": "1 + 2j", "value": "1+2j"},
+                        {"label": "2 + 0.5j", "value": "2+0.5j"},
+                        {"label": "2 + 2j", "value": "2+2j"},
+                        {"label": "Custom", "value": "custom"},
                     ],
                 )),
             dbc.Col(dbc.Button("Add!", id = 'add_allpass_button', color="primary", size='sm'), width = 2),
@@ -104,7 +110,7 @@ all_pass_card = dbc.Card(
             dbc.Row([dbc.Col(dcc.Graph(id='allpass_zplane', figure=allpass_zplane_plot()), style={'padding-left':'0', 'padding-right':'0', 'padding-top':'0', 'margin-top':'0'}),dbc.Col(dcc.Graph(id='allpass_phase', figure=plot_2()), style={'padding-left':'0', 'padding-right':'0'})]),
             dbc.Row(allpass_filters_lib_card),
             dbc.Row(dbc.Button("Apply!", id = 'apply_button', color="dark", size='sm'))
-            ], className = "p-2", style={'padding-top':'0'}),
+            ], style={'padding-top':'0', 'padding-right':'12px', 'padding-left':'12px'}),
     ],
 )
 
@@ -112,7 +118,7 @@ all_pass_card = dbc.Card(
 
 # SHOULD RECIEVE OLD PHASE RESPONSE FROM DESIGN TAB AND APPEND ANY ADDED ALL PASS FILTERS TO IT
 def plot_3():
-    fig3.add_scatter(x=[0],y=[0])
+    fig3.add_scatter(x=[],y=[])
     return fig3
 
 corrected_phase_card = dbc.Card(
@@ -147,14 +153,14 @@ def correct_tab_layout():
 )
 def add_allpass_to_list(is_open, value, custom_value):
     button_id = ctx.triggered_id
-    if value != "6":
-        create_allpass(float(value))
+    if value != "custom":
+        create_allpass(complex(value))
         if is_open: return not is_open, fig, fig2
         else: return is_open, fig, fig2
-    elif value == "6" and button_id == "allpass_dropdown":
+    elif value == "custom" and button_id == "allpass_dropdown":
         return not is_open, fig, fig2
-    elif value == "6" and button_id == "custom_allpass_input":
-        create_allpass(float(custom_value))
+    elif value == "custom" and button_id == "custom_allpass_input":
+        create_allpass(complex(custom_value))
         return is_open, fig, fig2
 
 
@@ -175,9 +181,9 @@ list_id = 0
 def add_allpass_to_list(value, n_clicks, custom_value, delete_n_clicks, children) :
     button_id = ctx.triggered_id
 
-    if value == "6" and button_id == "add_allpass_button":
+    if value == "custom" and button_id == "add_allpass_button":
         children.append(dbc.ListGroupItem(custom_value, id={'item':str(n_clicks)}, style={'color':'black'}, action=True, active=False))
-    elif value != "6" and button_id == "add_allpass_button":
+    elif value != "custom" and button_id == "add_allpass_button":
         children.append(dbc.ListGroupItem(value, id={'item':str(n_clicks)}, style={'color':'black'}, action=True, active=False))
         print("3ayel")
     if button_id == "delete_button":
@@ -202,8 +208,10 @@ def create_allpass(a) :
 
     w, h = sg.freqz([-a, 1.0], [1.0, -a])
 
-    fig.data[1].x = z
-    fig.data[2].x = p
+    fig.data[1].x = np.real(z)
+    fig.data[1].y = np.imag(z)
+    fig.data[2].x = np.real(p)
+    fig.data[2].y = np.imag(p)
 
     scatter = fig2.data[0]
     scatter.x = w/max(w)
