@@ -57,7 +57,7 @@ def updating_figure_desgin(figure=None,data_index=0,x=[],y=[],symbol='circle-ope
     if figure==z_plane_fig:
         scatter.marker.symbol=symbol
     
-def updating_all_figures(): 
+def  updating_all_figures(): 
     
     updating_figure_desgin(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
     updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
@@ -236,7 +236,7 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         #this loop is entred when both the poles button is open and the user pressed add
     elif p_active and 'add_button' in changed_id:
         #print("poles")
-        filter.add_pole( z_axis)
+        filter.add_pole(z_axis)
         print("THHHHHHHHHe filter")
         # print(filter.get_filter_dict())
         updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
@@ -251,13 +251,13 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         updating_figure_desgin(figure=magnitude_fig,data_index=0,x=filter.w,y=filter.filter_magnitude_response)
         updating_figure_desgin(figure=phase_fig,data_index=0,x=filter.w,y=filter.filter_phase_response)
     
-    if activated :  
+    if 'conj_checklist' in changed_id and activated:  
         
         print("enabled  TRUE")
         filter.enable_conjugates(True)
         updating_all_figures()
    
-    elif not activated  :
+    elif  'conj_checklist' in changed_id and not activated :
         print("enabled  FALSE")
         filter.enable_conjugates(False)
         updating_all_figures()

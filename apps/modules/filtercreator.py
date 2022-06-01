@@ -56,19 +56,50 @@ class Filter():
     def update_conjugates(self):
         if self.conjugate_enable:
          
-            print("filteeer befooooooore")
-            print(self.filter_poles)
+            # print("filteeer befooooooore")
+            # print(self.filter_poles)
+            # print("////////////////////////////////")           
+            # print(self.filter_zeros)
+            # print("congjgates befooooooore")
+            # print(self.conjugate_poles)
+            # print("////////////////////////////////")
+            # print(self.conjugate_zeros)
             
-            self.filter_poles=list(set(self.filter_poles).symmetric_difference(set(self.conjugate_poles)))
-            self.filter_zeros=list(set(self.filter_zeros).symmetric_difference(set(self.conjugate_zeros)))
+            self.filter_pole_new=list(set(self.filter_poles).symmetric_difference(set(self.conjugate_poles)))
+            self.filter_zeros_new=list(set(self.filter_zeros).symmetric_difference(set(self.conjugate_zeros)))
+            
+            # self.filter_poles_new = list(set(self.conjugate_poles).symmetric_difference(set(self.filter_poles)))
+            # self.filter_zeros_new = list(set(self.conjugate_zeros).symmetric_difference(set(self.filter_zeros)))
+           
+           
+            # for p in self.filter_pole_new:
+            #     self.filter_poles.append(p)
+            # for z in self.filter_zeros_new:
+            #     self.filter_zeros.append(z)
+
+            # self.filter_poles.append(self.filter_pole_new)
+            # self.filter_zeros.append(self.filter_zeros_new)
+
             
             print("filteeer afteeeeeeer")
-            print(self.filter_poles)
+            print(self.filter_pole_new)
+            # print("filter_poles afteeeeeeer")
+            # print(self.filter_poles)
+            print("////////////////////////////////")
+            print(self.filter_zeros_new)
+            # print("filter_zeros afteeeeeeer")
+            # print(self.filter_zeros)
+
+
+            print("congjgates afteeeeeeer")
+            # print(self.conjugate_poles)
+            print("////////////////////////////////")
+            # print(self.conjugate_zeros)
 
             temp_filter_poles=copy.copy(self.filter_poles)
             temp_filter_zeros=copy.copy(self.filter_zeros)
             
-            print("temp_filter_poles                   ppppp")
+            print("temp_filter_poles                 ppppp")
             print( temp_filter_poles)
             
             for pole in temp_filter_poles:
@@ -90,7 +121,8 @@ class Filter():
 
     def add_pole(self, pole):
         if self.conjugate_enable:
-            self.add_conjugate(pole)
+            # self.add_conjugate(pole)
+            self.filter_poles.append(pole)
             self.update_conjugates()
         else:
             self.filter_poles.append(pole)
@@ -99,23 +131,26 @@ class Filter():
     # TODO
     def add_zero(self, zero):
         if self.conjugate_enable:
-            self.add_conjugate(zero)
+            # self.add_conjugate(zero)
+            self.filter_zeros.append(zero)
+            self.update_conjugates()
+
         else:
             self.filter_zeros.append(zero)
         # self.update_conjugates()
 
     # TODO
     def add_conjugate(self, pole_zero='Pole', input=None):
-        print("entered  add_conjgate")
+        print("entered  add_conjgate    aaaaaa ")
         if pole_zero == 'Pole':
-            if input is None:
-                return
+            # if input is None:
+            #     return
             self.conjugate_poles.append(conjugate(input))
             self.filter_poles.append(conjugate(input))
             return
         elif pole_zero == 'Zero':
-            if input is None:
-                return
+            # if input is None:
+            #     return
             self.conjugate_zeros.append(conjugate(input))
             self.filter_zeros.append(conjugate(input))
             return
