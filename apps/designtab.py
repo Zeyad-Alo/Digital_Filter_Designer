@@ -120,8 +120,6 @@ collapse = html.Div(
     ]
 )
 
-
-
 #   OPTIONS (PREFERENCES) CARD BELOW ZPLANE
 options_card = dbc.Card(
     [

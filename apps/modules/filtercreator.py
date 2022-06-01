@@ -1,82 +1,189 @@
-import math
 import cmath
+from numpy import conjugate
 from scipy import signal as sg
+from dataclasses import dataclass, asdict, field
 
+
+@dataclass
 class Filter():
-   
-    def __init__(self, poles=[], zeros=[]):
-        self.name = None
-        self.filter_type = None
-        self.filter_poles = poles
-        self.filter_zeros = zeros
-        self.sampling_freq=44100
+    filter_poles: list = field(default_factory=list, repr=True)
+    filter_zeros: list = field(default_factory=list, repr=True)
+
+    conjugate_enable: bool = field(default=False, repr=False)
+    conjugate_poles: list = field(default_factory=list, repr=False)
+    conjugate_zeros: list = field(default_factory=list, repr=False)
+    sampling_freq: int = 44100
+    filter_type: str = field(default_factory=list, repr=False)
+
+    numerator: list = field(default_factory=list, repr=False)
+    denominator: list = field(default_factory=list, repr=False)
+
+    w: list = field(default_factory=list, repr=False)
+    filter_freq_response: list = field(default_factory=list, repr=False)
+    filter_phase_response: list = field(default_factory=list, repr=False)
+    filter_magnitude_response: list = field(default_factory=list, repr=False)
+
+    def __post_init__(self):
+        # check if filter already contains poles or zeros and update accordingly
+        if (self.filter_poles) > 0 or len(self.filter_zeros) > 0:
+            self.update_filter_from_zeropole()
+
+    # TODO dont forget to call this in the design tab???
+    def update_filter_from_zeropole(self):
+        '''Refresh filter variables from zeros and poles'''
+        self.filter_magnitude_response = []
+        self.filter_phase_response = []
+        # update equation and return based on filter type and poles and zeros
+        num, den = sg.zpk2tf(self.filter_zeros, self.filter_poles, 1)
+        w, freq_resp = sg.freqz(num, den, self.sampling_freq)
+        for h in freq_resp:
+            freqs = cmath.polar(h)
+            self.filter_magnitude_response.append(freqs[0])
+            self.filter_phase_response.append(freqs[1])
+
+        # update filter variables
+        self.w = w
+        self.numerator = num
+        self.denominator = den
+        self.filter_freq_response = freq_resp
+
+        return
+    # TODO CHECK IF ALL POLES HAVE A CONJUGATE OR NOT??
+
+    def update_conjugates(self):
+        if self.conjugate_enable:
+            self.conjugate_poles = []
+            self.conjugate_zeros = []
+            for pole in self.filter_poles:
+                self.add_conjugate('Pole', pole)
+            for zero in self.filter_zeros:
+                self.add_conjugate('Zero', zero)
+        else:
+            for pole in self.conjugate_poles:
+                self.filter_poles.remove(pole)
+            for zero in self.conjugate_zeros:
+                self.filter_zeros.remove(zero)
+
+            self.conjugate_poles = []
+            self.conjugate_zeros = []
+
+        self.update_filter_from_zeropole()
+
+    # TODO
 
     def add_pole(self, pole):
-        self.filter_poles.append(pole)
+        if self.conjugate_enable:
+            self.add_conjugate(pole)
+        else:
+            self.filter_poles.append(pole)
+        self.update_conjugates()
 
+    # TODO
     def add_zero(self, zero):
-        self.filter_zeros.append(zero)
+        if self.conjugate_enable:
+            self.add_conjugate(zero)
+        else:
+            self.filter_zeros.append(zero)
+        self.update_conjugates()
+
+    # TODO
+    def add_conjugate(self, polezero='Pole', input=None):
+        if polezero == 'Pole':
+            if input is None:
+                return
+            self.conjugate_poles.append(conjugate(input))
+            self.filter_poles.append(conjugate(input))
+        elif polezero == 'Zero':
+            if input is None:
+                return
+            self.conjugate_zeros.append(conjugate(input))
+            self.filter_zeros.append(conjugate(input))
+
+    # DONE
+
+    def enable_conjugates(self, boolean: bool = False):
+        self.conjugate_enable = boolean
+        self.update_conjugates()
+
+    # TODO must work with conjugates
 
     def remove_pole(self, pole):
         self.filter_poles.remove(pole)
+        self.update_conjugates()
 
+    # TODO must work with conjugates
     def remove_zero(self, zero):
         self.filter_zeros.remove(zero)
+        self.update_conjugates()
 
+    # TODO
+    def remove_conjugate(self, polezero='Pole', input=None):
+        if polezero == 'Pole':
+            if input is None:
+                return
+            self.conjugate_poles.remove(input)
+            self.filter_poles.remove(input)
+        elif polezero == 'Zero':
+            if input is None:
+                return
+            self.conjugate_zeros.remove(input)
+            self.filter_zeros.remove(input)
+
+    # TODO must work with conjugates and updaters
     def edit_pole(self, pole, new_pole):
-        self.filter_poles[pole] = new_pole 
+        self.filter_poles[pole] = new_pole
 
+    # TODO must work with conjugates and updaters
     def edit_zero(self, zero, new_zero):
         self.filter_zeros[zero] = new_zero
 
     def filter_type(self):
         if len(self.filter_poles) == 0:
             self.filter_type = "FIR"
-        else :
+        else:
             self.filter_type = "IIR"
-    
+
+    # TODO remove this from implementation later?
     def get_magnitude_phase_response(self):
-        self.filter_magnitude_response=[]
-        self.filter_phase_response =[]
+        self.filter_magnitude_response = []
+        self.filter_phase_response = []
         # update equation and return based on filter type and poles and zeros
-        num,den=sg.zpk2tf(self.filter_zeros,self.filter_poles, 1)
-        w,freq_resp=sg.freqz(num, den, self.sampling_freq)
+        num, den = sg.zpk2tf(self.filter_zeros, self.filter_poles, 1)
+        w, freq_resp = sg.freqz(num, den, self.sampling_freq)
         for h in freq_resp:
-            freqs=cmath.polar(h)
+            freqs = cmath.polar(h)
             self.filter_magnitude_response.append(freqs[0])
             self.filter_phase_response.append(freqs[1])
 
-        return self.filter_magnitude_response, self.filter_phase_response , w, num, den
+        return self.filter_magnitude_response, self.filter_phase_response, w, num, den
 
-    
+    # DONE
+    def get_phase_response(self):
+        return self.filter_phase_response, self.w
 
-    def get_impulse_response(self):
-        # update equation and return based on filter type and poles and zeros
-        return self.filter_equation
+    # DONE
+    def get_magnitude_response(self):
+        return self.filter_magnitude_response, self.w
+
+    # TODO @zeyad make this work with allpass filters, should store the modification in poles and zeros
+    # and also in allpass zeros and poles to be able to remove them whenever we want to from the original poles and zeros
+    def remove_allpass_filter(self, complex):
+        # self.filter_poles.remove(complex)
+        # self.filter_zeros.remove(complex)
+        pass
+
+    # TODO @zeyad make this work with allpass filters
+    def add_allpass_filter(self, complex):
+        # self.filter_poles.append(complex)
+        # self.filter_zeros.append(complex)
+        pass
 
     def filter_samples(self, samples):
         # filter signal here using obtained impulse response equation
         filtered_samples = []
         return filtered_samples
 
-
-    def system_gain(self):
-        # calculating the gain of the system mag response
-        pass
-
-
-def plot_magnitude_response(filter_response):
-    # plot filter response
-    return None
-
-
-def plot_phase_response(filter_response):
-    # plot filter response
-    return None
-
-
-def plot_z_transform(filter_response):
-    # plot zeros
-    # plot poles
-    # plot unit circle
-    return None
+    def get_filter_dict(self):
+        return asdict(self)
+    
+    
