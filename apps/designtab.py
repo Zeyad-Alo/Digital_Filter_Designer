@@ -259,44 +259,34 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         updating_all_figures()
 
     if 'dropdown_zeros' in changed_id:
-        #print("zeros_clear")
-        for z in filter.filter_zeros:
-            filter.remove_zero(z)
+        # #print("zeros_clear")
+        # for z in filter.filter_zeros:
+        #     filter.remove_zero(z)
 
-        #print(filter.filter_zeros)
-        filter.edit_zero(0,0)
-        #print(filter.filter_zeros)
-
+        # #print(filter.filter_zeros)
+        # filter.edit_zero(0,0)
+        # #print(filter.filter_zeros)
+        filter.clear_zeros()
         updating_all_figures()
        
 
     elif 'dropdown_poles' in changed_id:
         #print("poles_clear")
-        for p in filter.filter_poles:
-            filter.remove_pole(p)
+        # for p in filter.filter_poles:
+        #     filter.remove_pole(p)
 
-        #print(filter.filter_poles)
-        filter.edit_pole(0,0)
-        #print(filter.filter_poles)
-        
+        # #print(filter.filter_poles)
+        # filter.edit_pole(0,0)
+        # #print(filter.filter_poles)
+        filter.clear_poles()
         updating_all_figures()
         
 
     elif 'dropdown_all' in changed_id:
-        for z in filter.filter_zeros:
-            filter.remove_zero(z)
-        for p in filter.filter_poles:
-            filter.remove_pole(p)
         
-
-#/why edit used ?
-        filter.edit_zero(0,0)
-        #print(filter.filter_zeros)
-
-        filter.edit_pole(0,1+1j)
-        #print(filter.filter_poles)
-
-        updating_all_figures()       
+        filter.clear_filter()
+        updating_all_figures() 
+          
        
 
 

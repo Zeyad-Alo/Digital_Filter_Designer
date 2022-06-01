@@ -55,17 +55,19 @@ class Filter():
 
     def update_conjugates(self):
         if self.conjugate_enable:
-            # self.conjugate_poles = []
-            # self.conjugate_zeros = []
-            print("filteeer afteeeeeeer")
+         
+            print("filteeer befooooooore")
             print(self.filter_poles)
+            
             self.filter_poles=list(set(self.filter_poles).symmetric_difference(set(self.conjugate_poles)))
             self.filter_zeros=list(set(self.filter_zeros).symmetric_difference(set(self.conjugate_zeros)))
-            print("filteeer beforeeee")
+            
+            print("filteeer afteeeeeeer")
             print(self.filter_poles)
 
             temp_filter_poles=copy.copy(self.filter_poles)
             temp_filter_zeros=copy.copy(self.filter_zeros)
+            
             print("temp_filter_poles                   ppppp")
             print( temp_filter_poles)
             
@@ -89,6 +91,7 @@ class Filter():
     def add_pole(self, pole):
         if self.conjugate_enable:
             self.add_conjugate(pole)
+            self.update_conjugates()
         else:
             self.filter_poles.append(pole)
         # self.update_conjugates()
@@ -175,6 +178,25 @@ class Filter():
         return self.filter_magnitude_response, self.filter_phase_response, w, num, den
 
     # DONE
+   
+    def clear_filter(self):
+        self.filter_poles = []
+        self.filter_zeros = []
+        self.conjugate_poles = []
+        self.conjugate_zeros = []
+        self.update_filter_from_zeropole()
+
+    def clear_poles(self):
+        self.filter_poles = []
+        self.conjugate_poles = []
+        self.update_filter_from_zeropole()
+
+    def clear_zeros(self):
+        self.filter_zeros = []
+        self.conjugate_zeros = []
+        self.update_filter_from_zeropole()
+   
+
     def get_phase_response(self):
         return self.filter_phase_response, self.w
 
