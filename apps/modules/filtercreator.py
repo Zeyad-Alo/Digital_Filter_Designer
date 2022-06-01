@@ -1,6 +1,7 @@
 import math
 import cmath
 from scipy import signal as sg
+
 class Filter():
    
     def __init__(self, poles=[], zeros=[]):
@@ -23,7 +24,7 @@ class Filter():
         self.filter_zeros.remove(zero)
 
     def edit_pole(self, pole, new_pole):
-        self.filter_poles[pole] = new_pole
+        self.filter_poles[pole] = new_pole 
 
     def edit_zero(self, zero, new_zero):
         self.filter_zeros[zero] = new_zero
@@ -57,10 +58,7 @@ class Filter():
         filtered_samples = []
         return filtered_samples
 
-    def generate_filter_file(self):
-        # generate filter file.txt
-        # contains coefficients of filter?? idk
-        return None
+
     def system_gain(self):
         # calculating the gain of the system mag response
         pass

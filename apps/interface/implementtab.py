@@ -7,7 +7,7 @@ from app import app
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
-from apps.interface.designtab import plot
+
 from scipy import signal as sg
 
 fig4= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))

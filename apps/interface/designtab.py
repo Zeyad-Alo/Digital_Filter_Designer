@@ -1,6 +1,7 @@
 from dash import dcc, ctx
 from dash import html
 from dash import callback_context
+from zmq import SCATTER
 from apps.navbar import create_navbar
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -21,27 +22,12 @@ filter=filtercreator.Filter()
 
 # intializing figures in order to update them later(their layouts)
 
-fig = go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
-fig2= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
-fig3= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
-#   PLOT FUNCTIONS
-#THIS IS A PLACEHOLDER IN ORDER TO INITIALIZE OUR CARDS 
-def plot():
-    fig = go.Figure(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
-    return fig
-# for the second plot TO INITIALIZE THE MAGNITUDE CARD
-def plot_2():
-    fig2.add_scatter(x=[0],y=[0])
-    return fig2
+z_plane_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
+magnitude_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
+phase_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 
-# for the third plot TO INITIALIZE THE phaseCARD
-def plot_3():
-    fig3.add_scatter(x=[0],y=[0])
-    return fig3
-  
-#   TO INITIALIZE THE ZPLANE CARDS 
 
-def zplane_plot():
+def init_zplane_plot():
     #labels={'x':'t', 'y':'cos(t)'}
     # drawing the circle
     t = np.linspace(0, 2*np.pi, 100)
@@ -49,45 +35,48 @@ def zplane_plot():
     x = radius * np.cos(t)
     y = radius * np.sin(t)
     # these data are added to a scatter plt(to make points)
+    
     #data 0 for the unit circle 
-    fig.add_scatter(x=x,y=y,mode="lines")
+    z_plane_fig.add_scatter(x=x,y=y,mode="lines")
     
     # data 1 for zeros points
-    fig.add_scatter(x=[0],y=[0],mode="markers")
-    fig.data[1].marker.symbol = 'circle-open'
+    z_plane_fig.add_scatter(x=[],y=[],mode="markers")
+    z_plane_fig.data[1].marker.symbol = 'circle-open'
+   
     #data 2 for poles points
-    fig.add_scatter(x=[0],y=[0],mode="markers")
-    fig.data[2].marker.symbol = 'x-open'
-    fig.update(layout_showlegend=False)
+    z_plane_fig.add_scatter(x=[],y=[],mode="markers")
+    z_plane_fig.data[2].marker.symbol = 'x-thin-open'
+    
+    z_plane_fig.update(layout_showlegend=False)
     # this is returned in the 'figure=' of the zplane plot (look for the z plane card)
-    return fig
+    return z_plane_fig
 
 
 
+################################################################### ADDED FUNCTIONS (AS :))
+def updating_figure(figure=None,data_index=0,x=0,y=0,symbol='circle-open'):
+    scatter=figure.data[data_index]
+    scatter.x=list(x)
+    scatter.y=list(y)
+    if figure==z_plane_fig:
+        scatter.marker.symbol=symbol
+    
+def updating_all_figures():
+    magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
+    updating_figure(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
+    updating_figure(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
 
-def updating_fig(data,x,y,symbol):
-    print("updating zplot")
-    scatter = fig.data[data]
-    scatter.x = list(x)
-    scatter.y = list(y)
-    scatter.marker.symbol = symbol
-    print("updating done")
+    updating_figure(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
+    updating_figure(figure=phase_fig,data_index=0,x=w,y=phase_response)   
 
-def updating_fig2(data,x,y):
-    scatter = fig2.data[data]
-    scatter.x = list(x)
-    scatter.y = list(y)
 
-def updating_fig3(data,x,y):
-    scatter = fig3.data[data]
-    scatter.x = list(x)
-    scatter.y = list(y)
+
 
 #   PS: CARDS ARE UI ELEMENTS ONLY THE ORGANIZE FUNCTIONAL CONTENT
 zplane_card = dbc.Card(
     [
         dbc.CardHeader("Z-Plane"),
-        dbc.CardBody(dcc.Graph(id='z_plane', figure= zplane_plot()), className = "p-0"
+        dbc.CardBody(dcc.Graph(id='z_plane', figure= init_zplane_plot()), className = "p-0"
     )],
     )
 
@@ -160,7 +149,7 @@ options_card = dbc.Card(
 mag_card = dbc.Card(
     [
         dbc.CardHeader("Magnitude Response"),
-        dbc.CardBody(dcc.Graph(id='mag_response', figure=plot_2()), className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='mag_response', figure=magnitude_fig.add_scatter(x=[],y=[])), className = "p-0"),
     ],
 )
 
@@ -169,7 +158,7 @@ mag_card = dbc.Card(
 phase_card = dbc.Card(
     [
         dbc.CardHeader("Phase Response"),
-        dbc.CardBody(dcc.Graph(id='phase_response', figure=plot_3()), className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='phase_response', figure=phase_fig.add_scatter(x=[],y=[])), className = "p-0"),
     ],
 )
 
@@ -256,15 +245,16 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
 
     #TODO: return the num and den since its needed for the other tabs
  # this is initialized in order to know which button is pressed
-    changed_id = [p['prop_id'] for p in callback_context.triggered][0]
+    changed_id = [p['prop_id'] for p in callback_context.triggered][0]  
     # theta value and mag value are taken from the sliders
+    #///////////////////////////////////////////////////////// LEH ESMHAAA Z_axis
     z_axis=cmath.rect(mag_value,(theta_value*np.pi/180))
     #this loop is entred when both the zeros button is open and the user pressed add
     if z_active and 'add_button' in changed_id:
         print("zeros")
         filter.add_zero(z_axis)
         
-        updating_fig(1,np.real(filter.filter_zeros),np.imag(filter.filter_zeros),'circle-open')
+        updating_figure(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
  
         
         #this loop is entred when both the poles button is open and the user pressed add
@@ -272,17 +262,17 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         print("poles")
         filter.add_pole( z_axis)
 
-        updating_fig(2,np.real(filter.filter_poles),np.imag(filter.filter_poles),'x-open')
+        updating_figure(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
 
-    
+
     if 'add_button' in changed_id:  
         print("phase and mag resp")
-        magnitude_response,phase_response,w,num,den = filter.get_magnitude_phase_response()
-        updating_fig2(0,w,magnitude_response)
+        magnitude_response,phase_response,w,num,den = filter.get_magnitude_phase_response() 
+        updating_figure(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
         
-        updating_fig3(0,w,phase_response)
+        updating_figure(figure=phase_fig,data_index=0,x=w,y=phase_response)
     
-
+#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if activated and 'apply_button' in changed_id  :  
         #TODO PHASE/MAG RESPONSE GETS UPDATED EVEN IF THERE ALL CONJUGETS ARE PRESENT
         mag=[]
@@ -319,15 +309,9 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         for p in poles_all_conj:
             filter.add_pole(p)
 
-        magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
-        
-        updating_fig(1,np.real(filter.filter_zeros),np.imag(filter.filter_zeros),'circle-open')
-        updating_fig(2,np.real(filter.filter_poles),np.imag(filter.filter_poles),'x-open')
-
-        updating_fig2(0,w,magnitude_response)
-        updating_fig3(0,w,phase_response)
+        updating_all_figures()
+ 
     
-
 
     if 'dropdown_zeros' in changed_id:
         print("zeros_clear")
@@ -338,12 +322,8 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         filter.edit_zero(0,0)
         print(filter.filter_zeros)
 
-        magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
-        updating_fig(1,np.real(filter.filter_zeros),np.imag(filter.filter_zeros),'circle-open')
-        updating_fig(2,np.real(filter.filter_poles),np.imag(filter.filter_poles),'x-open')
-
-        updating_fig2(0,w,magnitude_response)
-        updating_fig3(0,w,phase_response)
+        updating_all_figures()
+       
 
     elif 'dropdown_poles' in changed_id:
         print("poles_clear")
@@ -353,12 +333,9 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         print(filter.filter_poles)
         filter.edit_pole(0,0)
         print(filter.filter_poles)
-        magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
-        updating_fig(1,np.real(filter.filter_zeros),np.imag(filter.filter_zeros),'circle-open')
-        updating_fig(2,np.real(filter.filter_poles),np.imag(filter.filter_poles),'x-open')
-
-        updating_fig2(0,w,magnitude_response)
-        updating_fig3(0,w,phase_response)
+        
+        updating_all_figures()
+        
 
     elif 'dropdown_all' in changed_id:
         for z in filter.filter_zeros:
@@ -367,20 +344,15 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
             filter.remove_pole(p)
         
 
-
-        filter.edit_zero(0,0)
+#/why edit used ?
+        filter.edit_zero(0,)
         print(filter.filter_zeros)
 
-        filter.edit_pole(0,0)
+        filter.edit_pole(0,1+1j)
         print(filter.filter_poles)
 
-        magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
-        updating_fig(1,np.real(filter.filter_zeros),np.imag(filter.filter_zeros),'circle-open')
-        updating_fig(2,np.real(filter.filter_poles),np.imag(filter.filter_poles),'x-open')
-
-
-        updating_fig2(0,w,magnitude_response)
-        updating_fig3(0,w,phase_response)
+        updating_all_figures()       
+       
 
 
     print("here")
@@ -403,7 +375,7 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
 
         real_den=np.real(den)
         imag_den=np.imag(den)
-
+#////////////////////////////// hena bt-addhom le list ezai same name ?
         real_num=real_num.tolist()
         imag_num=imag_num.tolist()
 
@@ -431,18 +403,13 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         elif data==2:
             filter.remove_pole(x+y*1j)
 
-        magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
-        
-        updating_fig(1,np.real(filter.filter_zeros),np.imag(filter.filter_zeros),'circle-open')
-        updating_fig(2,np.real(filter.filter_poles),np.imag(filter.filter_poles),'x-open')
-
-        updating_fig2(0,w,magnitude_response)
-        updating_fig3(0,w,phase_response)
+        updating_all_figures()
+    
     clicked_data = None
 
     # we return the figure in the "figure =" of zplot (find z plot card)
     #changing the array to list so the data in store id is right
-    return fig,fig2,fig3, real_num,imag_num,real_den,imag_den
+    return z_plane_fig,magnitude_fig,phase_fig, real_num,imag_num,real_den,imag_den
 
 
 
