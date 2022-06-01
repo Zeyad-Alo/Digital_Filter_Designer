@@ -162,23 +162,9 @@ class Filter():
             self.filter_type = "FIR"
         else:
             self.filter_type = "IIR"
+    
 
-    # TODO remove this from implementation later?
-    def get_magnitude_phase_response(self):
-        self.filter_magnitude_response = []
-        self.filter_phase_response = []
-        # update equation and return based on filter type and poles and zeros
-        num, den = sg.zpk2tf(self.filter_zeros, self.filter_poles, 1)
-        w, freq_resp = sg.freqz(num, den, self.sampling_freq)
-        for h in freq_resp:
-            freqs = cmath.polar(h)
-            self.filter_magnitude_response.append(freqs[0])
-            self.filter_phase_response.append(freqs[1])
-
-        return self.filter_magnitude_response, self.filter_phase_response, w, num, den
-
-    # DONE
-   
+# Clears the filter   
     def clear_filter(self):
         self.filter_poles = []
         self.filter_zeros = []

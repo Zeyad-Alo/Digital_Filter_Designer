@@ -58,12 +58,12 @@ def updating_figure_desgin(figure=None,data_index=0,x=[],y=[],symbol='circle-ope
         scatter.marker.symbol=symbol
     
 def updating_all_figures(): 
-    magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
+    
     updating_figure_desgin(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
     updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
 
-    updating_figure_desgin(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
-    updating_figure_desgin(figure=phase_fig,data_index=0,x=w,y=phase_response)   
+    updating_figure_desgin(figure=magnitude_fig,data_index=0,x=filter.w,y=filter.filter_magnitude_response)
+    updating_figure_desgin(figure=phase_fig,data_index=0,x=filter.w,y=filter.filter_phase_response)   
 
 
 #   PS: CARDS ARE UI ELEMENTS ONLY THE ORGANIZE FUNCTIONAL CONTENT
@@ -244,40 +244,33 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
 
     if 'add_button' in changed_id:  
         #print("phase and mag resp")
-        magnitude_response,phase_response,w,num,den = filter.get_magnitude_phase_response() 
-        updating_figure_desgin(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
+        # magnitude_response,phase_response,w,num,den = filter.get_magnitude_phase_response() 
+        # updating_figure_desgin(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
         
-        updating_figure_desgin(figure=phase_fig,data_index=0,x=w,y=phase_response)
+        # updating_figure_desgin(figure=phase_fig,data_index=0,x=w,y=phase_response)
+        updating_figure_desgin(figure=magnitude_fig,data_index=0,x=filter.w,y=filter.filter_magnitude_response)
+        updating_figure_desgin(figure=phase_fig,data_index=0,x=filter.w,y=filter.filter_phase_response)
     
     if activated :  
+        
         print("enabled  TRUE")
         filter.enable_conjugates(True)
         updating_all_figures()
+   
     elif not activated  :
         print("enabled  FALSE")
         filter.enable_conjugates(False)
         updating_all_figures()
 
+    
     if 'dropdown_zeros' in changed_id:
-        # #print("zeros_clear")
-        # for z in filter.filter_zeros:
-        #     filter.remove_zero(z)
-
-        # #print(filter.filter_zeros)
-        # filter.edit_zero(0,0)
-        # #print(filter.filter_zeros)
+      
         filter.clear_zeros()
         updating_all_figures()
        
 
     elif 'dropdown_poles' in changed_id:
-        #print("poles_clear")
-        # for p in filter.filter_poles:
-        #     filter.remove_pole(p)
-
-        # #print(filter.filter_poles)
-        # filter.edit_pole(0,0)
-        # #print(filter.filter_poles)
+   
         filter.clear_poles()
         updating_all_figures()
         
@@ -288,35 +281,20 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         updating_all_figures() 
           
        
-
-
-    #print("here")
     # for storing DASH CANNOT PROCESS COMPLEX NUMBERS
-    if len(num) == 0 and len(den) ==0:
-        #print("list data")
-        #print(type(real_num))
-        #print(type(real_den))
-        #print(real_num)
-        #print(real_den)
-        #print(imag_num)
-        #print(imag_den)
-   # else:
-        
-        #print("numpy data")
-        #print(num)
-        #print(den)
+    # if len(num) == 0 and len(den) ==0:
 
-        real_num=np.real(num)
-        imag_num=np.imag(num)
+    #     real_num=np.real(num)
+    #     imag_num=np.imag(num)
 
-        real_den=np.real(den)
-        imag_den=np.imag(den)
+    #     real_den=np.real(den)
+    #     imag_den=np.imag(den)
 
-        real_num=real_num.tolist()
-        imag_num=imag_num.tolist()
+    #     real_num=real_num.tolist()
+    #     imag_num=imag_num.tolist()
 
-        real_den=real_den.tolist()
-        imag_den=imag_den.tolist()
+    #     real_den=real_den.tolist()
+    #     imag_den=imag_den.tolist()
 
         #print(type(real_num))
         #print(type(real_den))
