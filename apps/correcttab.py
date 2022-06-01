@@ -6,7 +6,6 @@ from app import app
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
-from apps.designtab import plot
 import cmath
 from scipy import signal as sg
 
