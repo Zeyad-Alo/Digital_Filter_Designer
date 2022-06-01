@@ -11,9 +11,9 @@ from scipy import signal as sg
 
 
 
-fig = go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
-fig2= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 0, margin_r = 20, margin_t = 40))
-fig3= go.FigureWidget(layout=dict(template='plotly_dark', height = 400, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
+allpass_zplane_fig = go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
+allpass_phase_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 0, margin_r = 20, margin_t = 40))
+corrected_phase_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 400, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 
 all_pass_filters_ids = []
 
@@ -30,18 +30,18 @@ def allpass_zplane_plot():
     y = radius * np.sin(t)
     # these data are added to a scatter plt(to make points)
     #data 0 for the unit circle 
-    fig.add_scatter(x=x,y=y,mode="lines")
-    fig.update_xaxes(scaleanchor="y")
+    allpass_zplane_fig.add_scatter(x=x,y=y,mode="lines")
+    allpass_zplane_fig.update_xaxes(scaleanchor="y")
   
     # data 1 for zeros points
-    fig.add_scatter(x=[],y=[],mode="markers")
-    fig.data[1].marker.symbol = 'circle-open'
+    allpass_zplane_fig.add_scatter(x=[],y=[],mode="markers")
+    allpass_zplane_fig.data[1].marker.symbol = 'circle-open'
     #data 2 for poles points
-    fig.add_scatter(x=[],y=[],mode="markers")
-    fig.data[2].marker.symbol = 'x-open'
-    fig.update(layout_showlegend=False)
+    allpass_zplane_fig.add_scatter(x=[],y=[],mode="markers")
+    allpass_zplane_fig.data[2].marker.symbol = 'x-open'
+    allpass_zplane_fig.update(layout_showlegend=False)
     # this is returned in the 'figure=' of the zplane plot (look for the z plane card)
-    return fig
+    return allpass_zplane_fig
 
 
 #---------------------------------------------------------------------------------------------------------------------
@@ -54,9 +54,9 @@ def allpass_zplane_plot():
 #---------------------------------------------PHASE RESPONSE------------------------------------------------------------------
 # SHOULD SHOW PAHSE RESPONSE OF SELECTED ALL PASS FILTER
 def plot_2():
-    fig2.add_scatter(x=[],y=[])
-    fig2.update(layout_showlegend=False)
-    return fig2
+    allpass_phase_fig.add_scatter(x=[],y=[])
+    allpass_phase_fig.update(layout_showlegend=False)
+    return allpass_phase_fig
 
 
 #------------------------------------------------------------------------------------------------------------------------------
@@ -118,8 +118,8 @@ all_pass_card = dbc.Card(
 
 # SHOULD RECIEVE OLD PHASE RESPONSE FROM DESIGN TAB AND APPEND ANY ADDED ALL PASS FILTERS TO IT
 def plot_3():
-    fig3.add_scatter(x=[],y=[])
-    return fig3
+    corrected_phase_fig.add_scatter(x=[],y=[])
+    return corrected_phase_fig
 
 corrected_phase_card = dbc.Card(
     [
@@ -155,13 +155,13 @@ def add_allpass_to_list(is_open, value, custom_value):
     button_id = ctx.triggered_id
     if value != "custom":
         create_allpass(complex(value))
-        if is_open: return not is_open, fig, fig2
-        else: return is_open, fig, fig2
+        if is_open: return not is_open, allpass_zplane_fig, allpass_phase_fig
+        else: return is_open, allpass_zplane_fig, allpass_phase_fig
     elif value == "custom" and button_id == "allpass_dropdown":
-        return not is_open, fig, fig2
+        return not is_open, allpass_zplane_fig, allpass_phase_fig
     elif value == "custom" and button_id == "custom_allpass_input":
         create_allpass(complex(custom_value))
-        return is_open, fig, fig2
+        return is_open, allpass_zplane_fig, allpass_phase_fig
 
 
 
@@ -208,12 +208,12 @@ def create_allpass(a) :
 
     w, h = sg.freqz([-a, 1.0], [1.0, -a])
 
-    fig.data[1].x = np.real(z)
-    fig.data[1].y = np.imag(z)
-    fig.data[2].x = np.real(p)
-    fig.data[2].y = np.imag(p)
+    allpass_zplane_fig.data[1].x = np.real(z)
+    allpass_zplane_fig.data[1].y = np.imag(z)
+    allpass_zplane_fig.data[2].x = np.real(p)
+    allpass_zplane_fig.data[2].y = np.imag(p)
 
-    scatter = fig2.data[0]
+    scatter = allpass_phase_fig.data[0]
     scatter.x = w/max(w)
     scatter.y = np.unwrap(np.angle(h))
 
