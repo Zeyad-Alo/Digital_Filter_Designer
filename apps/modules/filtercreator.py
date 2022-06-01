@@ -6,22 +6,25 @@ from dataclasses import dataclass, asdict, field
 
 @dataclass
 class Filter():
-    filter_poles: list = field(default_factory=list, repr=True)
-    filter_zeros: list = field(default_factory=list, repr=True)
+    filter_poles: list = field(default_factory=list, repr=True, dict=True)
+    filter_zeros: list = field(default_factory=list, repr=True, dict=True)
 
-    conjugate_enable: bool = field(default=False, repr=False)
-    conjugate_poles: list = field(default_factory=list, repr=False)
-    conjugate_zeros: list = field(default_factory=list, repr=False)
+    conjugate_enable: bool = field(default=False, repr=False, dict=False)
+    conjugate_poles: list = field(default_factory=list, repr=False, dict=False)
+    conjugate_zeros: list = field(default_factory=list, repr=False, dict=False)
     sampling_freq: int = 44100
-    filter_type: str = field(default_factory=list, repr=False)
+    filter_type: str = field(default_factory=list, repr=False, dict=False)
 
-    numerator: list = field(default_factory=list, repr=False)
-    denominator: list = field(default_factory=list, repr=False)
+    numerator: list = field(default_factory=list, repr=False, dict=False)
+    denominator: list = field(default_factory=list, repr=False, dict=False)
 
-    w: list = field(default_factory=list, repr=False)
-    filter_freq_response: list = field(default_factory=list, repr=False)
-    filter_phase_response: list = field(default_factory=list, repr=False)
-    filter_magnitude_response: list = field(default_factory=list, repr=False)
+    w: list = field(default_factory=list, repr=False, dict=False)
+    filter_freq_response: list = field(
+        default_factory=list, repr=False, dict=False)
+    filter_phase_response: list = field(
+        default_factory=list, repr=False, dict=False)
+    filter_magnitude_response: list = field(
+        default_factory=list, repr=False, dict=False)
 
     def __post_init__(self):
         # check if filter already contains poles or zeros and update accordingly
@@ -185,5 +188,3 @@ class Filter():
 
     def get_filter_dict(self):
         return asdict(self)
-    
-    
