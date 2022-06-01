@@ -13,7 +13,6 @@ import math
 from apps.modules import filtercreator
 from scipy import signal as sg
 
-
 zeros_all_conj=[]
 poles_all_conj=[]
 #object
@@ -34,7 +33,6 @@ def init_zplane_plot():
     x = radius * np.cos(t)
     y = radius * np.sin(t)
     # these data are added to a scatter plt(to make points)
-    
     #data 0 for the unit circle 
     z_plane_fig.add_scatter(x=x,y=y,mode="lines")
     
@@ -49,8 +47,6 @@ def init_zplane_plot():
     z_plane_fig.update(layout_showlegend=False)
     # this is returned in the 'figure=' of the zplane plot (look for the z plane card)
     return z_plane_fig
-
-
 
 ####################################### ADDED FUNCTIONS (AS :) ) #######################################
 
@@ -68,8 +64,6 @@ def updating_all_figures():
 
     updating_figure(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
     updating_figure(figure=phase_fig,data_index=0,x=w,y=phase_response)   
-
-
 
 
 #   PS: CARDS ARE UI ELEMENTS ONLY THE ORGANIZE FUNCTIONAL CONTENT
@@ -142,10 +136,6 @@ options_card = dbc.Card(
     )],
 )
 
-
-
-
-
 mag_card = dbc.Card(
     [
         dbc.CardHeader("Magnitude Response"),
@@ -159,10 +149,9 @@ phase_card = dbc.Card(
     [
         dbc.CardHeader("Phase Response"),
         dbc.CardBody(dcc.Graph(id='phase_response', figure=phase_fig.add_scatter(x=[],y=[])), className = "p-0"),
+
     ],
 )
-
-
 
 
 #   PUTS EVERYTHING IN DESIGN TAB TOGETHER IN A LAYOUT
@@ -175,10 +164,6 @@ def design_tab_layout():
         ],            
                       )
     return layout
-
-
-
-
 
 #   CALLBACK FOR COLLAPSE BUTTONS (ZEROS BUTTON AND POLES BUTTON)
 @app.callback(
@@ -214,13 +199,10 @@ SAMPLING_FREQ=44100
     Output("z_plane", "figure"),
     Output("mag_response", "figure"),
     Output("phase_response", "figure"),
-
     Output("store_num_real", "data"),
     Output("store_num_imag", "data"),
     Output("store_den_real", "data"),
     Output("store_den_imag", "data"),
-
-    
     Input("add_button","n_clicks"),
     Input("mag_slider", "value"),
     Input("theta_slider", "value"),
@@ -231,10 +213,9 @@ SAMPLING_FREQ=44100
     Input("dropdown_zeros","n_clicks"),
     Input("dropdown_poles","n_clicks"),
     Input("dropdown_all","n_clicks"),
+
     Input("z_plane", "clickData"),
-
 )
-
 def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,apply_click,activated,zclicks,pclicks,allclicks,clicked_data):
     num=[]
     den=[]
@@ -247,7 +228,6 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
  # this is initialized in order to know which button is pressed
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]  
     # theta value and mag value are taken from the sliders
-    #///////////////////////////////////////////////////////// LEH ESMHAAA Z_axis
     z_axis=cmath.rect(mag_value,(theta_value*np.pi/180))
     #this loop is entred when both the zeros button is open and the user pressed add
     if z_active and 'add_button' in changed_id:
@@ -255,8 +235,6 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         filter.add_zero(z_axis)
         
         updating_figure(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
- 
-        
         #this loop is entred when both the poles button is open and the user pressed add
     elif p_active and 'add_button' in changed_id:
         print("poles")
@@ -272,7 +250,6 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         
         updating_figure(figure=phase_fig,data_index=0,x=w,y=phase_response)
     
-#///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     if activated and 'apply_button' in changed_id  :  
         #TODO PHASE/MAG RESPONSE GETS UPDATED EVEN IF THERE ALL CONJUGETS ARE PRESENT
         mag=[]
@@ -310,8 +287,7 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
             filter.add_pole(p)
 
         updating_all_figures()
- 
-    
+
 
     if 'dropdown_zeros' in changed_id:
         print("zeros_clear")
@@ -410,7 +386,3 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
     # we return the figure in the "figure =" of zplot (find z plot card)
     #changing the array to list so the data in store id is right
     return z_plane_fig,magnitude_fig,phase_fig, real_num,imag_num,real_den,imag_den
-
-
-
-

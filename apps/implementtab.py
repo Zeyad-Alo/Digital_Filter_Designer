@@ -6,7 +6,6 @@ from app import app
 from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
-
 from scipy import signal as sg
 
 fig4= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
@@ -116,21 +115,14 @@ def parse_contents(contents, filename, date):
 @app.callback(
     Output("original_signal", "figure"),
     Output("filtered_signal", "figure"),
-   
-
-
     Input('upload', 'contents'),
     State('upload', 'filename'),
     State('upload', 'last_modified'),
-
     Input("store_num_real", "data"),
     Input("store_num_imag", "data"),
     Input("store_den_real", "data"),
     Input("store_den_imag", "data"),
-
     Input("speed_slider", "value"),
-    
-
 )
 
 def Signal_update(contents,filename,last_modified,num_real,num_imag,den_real,den_imag,speed):
@@ -160,7 +152,6 @@ def Signal_update(contents,filename,last_modified,num_real,num_imag,den_real,den
         self.pointsToAppend += 50*speed
         updating_fig4(0,time[:pointsToAppend],mag[:pointsToAppend])
         updating_fig5(0,time[:pointsToAppend],filterd_signal[:pointsToAppend])
-    print("here2")
     return  fig4,fig5
 
 
