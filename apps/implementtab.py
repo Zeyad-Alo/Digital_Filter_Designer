@@ -8,36 +8,24 @@ import plotly.graph_objects as go
 import numpy as np
 from scipy import signal as sg
 
-fig4= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
-fig5= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
+signal_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
+filterd_signal_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 
-
-
-# for the fourth plot TO INITIALIZE THE signal CARD
-def plot_4():
-    fig4.add_scatter(x=[0],y=[0])
-    return fig4
-
-# for the fifth plot TO INITIALIZE THE filterd signal CARD
-def plot_5():
-    fig5.add_scatter(x=[0],y=[0])
-    return fig5
 
 
 original_signal_card = dbc.Card(
     [
         dbc.CardHeader("Signal"),
-        dbc.CardBody(dcc.Graph(id='original_signal', figure=plot_4()), className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='original_signal', figure=signal_fig.add_scatter(x=[],y=[])), className = "p-0"),
     ],
     style={'padding-right': '0', 'padding-left': '0'}
 )
 
 
-
 filtered_signal_card = dbc.Card(
     [
         dbc.CardHeader("Filtered Signal"),
-        dbc.CardBody(dcc.Graph(id='filtered_signal', figure=plot_5()), className = "p-0"),
+        dbc.CardBody(dcc.Graph(id='filtered_signal', figure=filterd_signal_fig.add_scatter(x=[],y=[])), className = "p-0"),
         dbc.CardFooter(
             dbc.Row([
                 dbc.Col(dcc.Markdown('Speed', className="p-0"), width=1),
@@ -49,8 +37,6 @@ filtered_signal_card = dbc.Card(
     style={'padding-right': '0', 'padding-left': '0'}
 
 )
-
-
 
 nav = dbc.Nav(
     [
@@ -77,15 +63,12 @@ def implement_tab_layout():
 
 
 
-def updating_fig4(data,x,y):
-    scatter = fig2.data[data]
-    scatter.x = list(x)
-    scatter.y = list(y)
+def updating_figure_implement(figure=None,data_index=0,x=[],y=[]):
+    scatter=figure.data[data_index]
+    scatter.x=list(x)
+    scatter.y=list(y)
 
-def updating_fig5(data,x,y):
-    scatter = fig3.data[data]
-    scatter.x = list(x)
-    scatter.y = list(y)
+
 
 def parse_contents(contents, filename, date):
     pd.options.display.max_rows = 10000
@@ -149,10 +132,10 @@ def Signal_update(contents,filename,last_modified,num_real,num_imag,den_real,den
         filterd_signal=sg.lfilter(num,den,mag)
         # len(time) will tell me how many sampels do i have 
         print(len(time))
-        self.pointsToAppend += 50*speed
-        updating_fig4(0,time[:pointsToAppend],mag[:pointsToAppend])
-        updating_fig5(0,time[:pointsToAppend],filterd_signal[:pointsToAppend])
-    return  fig4,fig5
+        pointsToAppend += 50*speed
+        updating_figure_implement(figure=signal_fig,x=time[:pointsToAppend],y=mag[:pointsToAppend])
+        updating_figure_implement(figure=filterd_signal_fig,x=time[:pointsToAppend],y=filterd_signal[:pointsToAppend])
+    return  signal_fig,filterd_signal_fig
 
 
 
