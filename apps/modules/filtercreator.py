@@ -209,7 +209,7 @@ class Filter():
         
 
         filtered_samples=sg.lfilter(b=self.numerator,a=self.denominator,x=samples)
-        print(filtered_samples)
+        
         return filtered_samples
 
     def get_filter_dict(self):
