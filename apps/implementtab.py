@@ -164,9 +164,9 @@ def Signal_update(zeros,poles, speed,n,disabled,time,mag,interval):
     filter=Filter()
 
     for i in zeros:
-            filter.add_zero(complex(i))
+            filter.add_pole_zero(complex(i),filter.filter_zeros)
     for i in poles:
-        filter.add_pole(complex(i))
+        filter.add_pole_zero(complex(i),filter.filter_poles)
     print ("interval")
     print(interval)
     print("store") 

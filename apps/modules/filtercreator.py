@@ -16,7 +16,7 @@ class Filter():
     conjugate_enable: bool = field(default=False, repr=False)
     conjugate_poles: list = field(default_factory=list, repr=False)
     conjugate_zeros: list = field(default_factory=list, repr=False)
-    sampling_freq: int = 600
+    sampling_freq: int = 300
     filter_type: str = field(default_factory=list, repr=False)
 
     numerator: list = field(default_factory=list, repr=False)
@@ -55,7 +55,6 @@ class Filter():
         self.filter_freq_response = freq_resp
 
         return
-    # TODO CHECK IF ALL POLES HAVE A CONJUGATE OR NOT??
    
     def enable_conjugates(self, boolean: bool = False):
         self.conjugate_enable = boolean
@@ -187,9 +186,9 @@ class Filter():
 
     def filter_samples(self,samples):
         # filter signal 
+        filtered_samples=[]
         filtered_samples=sg.lfilter(b=self.numerator,a=self.denominator,x=samples)
-        
-        return filtered_samples
+        return np.real(filtered_samples)
 
     def get_filter_dict(self):
         return asdict(self)

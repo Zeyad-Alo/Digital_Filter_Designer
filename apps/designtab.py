@@ -284,28 +284,6 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
         filter.clear_filter()
         updating_all_figures() 
           
-       
-    # for storing DASH CANNOT PROCESS COMPLEX NUMBERS
-    # if len(num) == 0 and len(den) ==0:
-
-    #     real_num=np.real(num)
-    #     imag_num=np.imag(num)
-
-    #     real_den=np.real(den)
-    #     imag_den=np.imag(den)
-
-    #     real_num=real_num.tolist()
-    #     imag_num=imag_num.tolist()
-
-    #     real_den=real_den.tolist()
-    #     imag_den=imag_den.tolist()
-
-        #print(type(real_num))
-        #print(type(real_den))
-        #print(real_num)
-        #print(real_den)
-        #print(imag_num)
-        #print(imag_den)
     
 
 
