@@ -56,7 +56,12 @@ class Filter():
 
         return
     # TODO CHECK IF ALL POLES HAVE A CONJUGATE OR NOT??
+   
+    def enable_conjugates(self, boolean: bool = False):
+        self.conjugate_enable = boolean
+        self.update_conjugates()
 
+   
     def update_conjugates(self):
         if self.conjugate_enable:
             
@@ -100,10 +105,9 @@ class Filter():
         self.update_filter_from_zeropole()
 
 
-            
-
-    # TODO
-
+   
+    #ADDING A POLE OR A ZERO
+    
     def add_pole(self, pole):
         if self.conjugate_enable:
             self.filter_poles.append(pole)
@@ -111,9 +115,7 @@ class Filter():
         else:
             self.filter_poles.append(pole)
         self.update_filter_from_zeropole()
-        # self.update_conjugates()
 
-    # TODO
     def add_zero(self, zero):
         if self.conjugate_enable:
             self.filter_zeros.append(zero)
@@ -122,14 +124,8 @@ class Filter():
         else:
             self.filter_zeros.append(zero)
         self.update_filter_from_zeropole()
-        # self.update_conjugates()
 
-
-    def enable_conjugates(self, boolean: bool = False):
-        self.conjugate_enable = boolean
-        self.update_conjugates()
-
-    # TODO must work with conjugates
+    # DELETING A POLE OR A ZERO
 
     def remove_pole(self, pole):
         if self.conjugate_enable:
@@ -137,44 +133,19 @@ class Filter():
             self.filter_poles.remove(conjugate(pole))
         else:
             self.filter_poles.remove(pole)
+        self.update_filter_from_zeropole()
 
-    # TODO must work with conjugates
     def remove_zero(self, zero):
         if self.conjugate_enable:
             self.filter_zeros.remove(zero)
             self.filter_zeros.remove(conjugate(zero))
-            
-            # self.update_conjugates()
         else:
             self.filter_zeros.remove(zero)
+        self.update_filter_from_zeropole()
 
-    # TODO
-    # def remove_conjugate(self, polezero='Pole', input=None):
-    #     if polezero == 'Pole':
-           
-    #         self.filter_poles.remove(input)
-    #     elif polezero == 'Zero':
-    #         # if input is None:
-    #         #     return
-    #         self.conjugate_zeros.remove(input)
-    #         self.filter_zeros.remove(input)
 
-    # TODO must work with conjugates and updaters
-    def edit_pole(self, pole, new_pole):
-        self.filter_poles[pole] = new_pole
-
-    # TODO must work with conjugates and updaters
-    def edit_zero(self, zero, new_zero):
-        self.filter_zeros[zero] = new_zero
-
-    def filter_type(self):
-        if len(self.filter_poles) == 0:
-            self.filter_type = "FIR"
-        else:
-            self.filter_type = "IIR"
+    # CLEARS ALL ZEROS/POLES OR BOTH 
     
-
-# Clears the filter   
     def clear_filter(self):
         self.filter_poles = []
         self.filter_zeros = []
@@ -192,6 +163,21 @@ class Filter():
         self.conjugate_zeros = []
         self.update_filter_from_zeropole()
    
+
+    # TODO must work with conjugates and updaters
+    def edit_pole(self, pole, new_pole):
+        self.filter_poles[pole] = new_pole
+
+    # TODO must work with conjugates and updaters
+    def edit_zero(self, zero, new_zero):
+        self.filter_zeros[zero] = new_zero
+
+    def filter_type(self):
+        if len(self.filter_poles) == 0:
+            self.filter_type = "FIR"
+        else:
+            self.filter_type = "IIR"
+    
 
     def get_phase_response(self):
         return self.filter_phase_response, self.w
