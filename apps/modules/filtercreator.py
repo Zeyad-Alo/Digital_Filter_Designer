@@ -5,6 +5,9 @@ from dataclasses import dataclass, asdict, field
 import copy
 import numpy as np
 
+
+#TODO loop on imaginary part
+
 @dataclass
 class Filter():
     filter_poles: list = field(default_factory=list, repr=True)
@@ -57,36 +60,52 @@ class Filter():
     def update_conjugates(self):
         if self.conjugate_enable:
             
-            self.filter_pole_new=list(set(self.filter_poles).symmetric_difference(set(self.conjugate_poles)))
-            self.filter_zeros_new=list(set(self.filter_zeros).symmetric_difference(set(self.conjugate_zeros)))
-            
-            temp_filter_poles=copy.copy(self.filter_poles)
-            temp_filter_zeros=copy.copy(self.filter_zeros)
-            
+                temp_poles=[] 
+                temp_zeros=[]
 
+            # making filter_poles having the points and its conjugates
+                for pole in self.filter_poles: 
+                    if np.imag(pole) >= 0:
+                        temp_poles.append(pole)   
+                
+                temp_loop_poles=copy.copy(temp_poles)
+                for pole in temp_loop_poles:
+                        if np.imag(pole)!=0 :  
+                            temp_poles.append(conjugate(pole))
+                
+                self.filter_poles=temp_poles
 
+            # making filter_zeros having the points and its conjugates
+                for zero in self.filter_zeros:
+                    if np.imag(zero) >= 0:
+                        temp_zeros.append(zero)
+                
+                temp_loop_zeros=copy.copy(temp_zeros)
+                for zero in temp_loop_zeros:
+                    if np.imag(zero)!=0 :  
+                        temp_zeros.append(conjugate(zero))
 
-            for pole in temp_filter_poles:
-                self.add_conjugate('Pole', pole)
-            for zero in  temp_filter_zeros:
-                self.add_conjugate('Zero', zero)
-               
+                self.filter_zeros=temp_zeros
         else:
-            for pole in self.conjugate_poles:
-                self.filter_poles.remove(pole)
-            for zero in self.conjugate_zeros:
-                self.filter_zeros.remove(zero)
+                tmp_poles=copy.copy(self.filter_poles)
+                for pole in tmp_poles:
+                    if np.imag(pole) < 0:
+                        self.filter_poles.remove(pole)
+               
+                tmp_zeros=copy.copy(self.filter_zeros)
+                for zero in tmp_zeros:
+                    if np.imag(zero) < 0:
+                        self.filter_zeros.remove(zero)
 
-            self.conjugate_poles = []
-            self.conjugate_zeros = []
-            
         self.update_filter_from_zeropole()
+
+
+            
 
     # TODO
 
     def add_pole(self, pole):
         if self.conjugate_enable:
-            # self.add_conjugate(pole)
             self.filter_poles.append(pole)
             self.update_conjugates()
         else:
@@ -97,7 +116,6 @@ class Filter():
     # TODO
     def add_zero(self, zero):
         if self.conjugate_enable:
-            # self.add_conjugate(zero)
             self.filter_zeros.append(zero)
             self.update_conjugates()
 
@@ -106,25 +124,6 @@ class Filter():
         self.update_filter_from_zeropole()
         # self.update_conjugates()
 
-    # TODO
-    def add_conjugate(self, pole_zero='Pole', input=None):
-        print("entered  add_conjgate    aaaaaa ")
-        if np.imag(input)==0 :  
-            return
-        else:
-            if pole_zero == 'Pole':
-                if input is None:
-                    raise Exception('No pole input')
-                self.conjugate_poles.append(conjugate(input))
-                self.filter_poles.append(conjugate(input))
-                return
-            elif pole_zero == 'Zero':
-                if input is None:
-                    raise Exception('No zero input')
-                self.conjugate_zeros.append(conjugate(input))
-                self.filter_zeros.append(conjugate(input))
-                return
-    # DONE
 
     def enable_conjugates(self, boolean: bool = False):
         self.conjugate_enable = boolean
@@ -135,8 +134,7 @@ class Filter():
     def remove_pole(self, pole):
         if self.conjugate_enable:
             self.filter_poles.remove(pole)
-            self.remove_conjugate(polezero='Pole',input=conjugate(pole))
-            # self.update_conjugates()
+            self.filter_poles.remove(conjugate(pole))
         else:
             self.filter_poles.remove(pole)
 
@@ -144,24 +142,22 @@ class Filter():
     def remove_zero(self, zero):
         if self.conjugate_enable:
             self.filter_zeros.remove(zero)
-            self.remove_conjugate(polezero='Zero',input=conjugate(zero))
+            self.filter_zeros.remove(conjugate(zero))
             
             # self.update_conjugates()
         else:
             self.filter_zeros.remove(zero)
 
     # TODO
-    def remove_conjugate(self, polezero='Pole', input=None):
-        if polezero == 'Pole':
-            # if input is None:
-            #     return
-            self.conjugate_poles.remove(input)
-            self.filter_poles.remove(input)
-        elif polezero == 'Zero':
-            # if input is None:
-            #     return
-            self.conjugate_zeros.remove(input)
-            self.filter_zeros.remove(input)
+    # def remove_conjugate(self, polezero='Pole', input=None):
+    #     if polezero == 'Pole':
+           
+    #         self.filter_poles.remove(input)
+    #     elif polezero == 'Zero':
+    #         # if input is None:
+    #         #     return
+    #         self.conjugate_zeros.remove(input)
+    #         self.filter_zeros.remove(input)
 
     # TODO must work with conjugates and updaters
     def edit_pole(self, pole, new_pole):
