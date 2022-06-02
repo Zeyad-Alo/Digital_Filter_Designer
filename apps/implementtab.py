@@ -13,6 +13,7 @@ import io
 import pandas as pd
 import cmath
 from apps.modules.filtercreator import Filter
+
 signal_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 filterd_signal_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 
@@ -145,8 +146,8 @@ def Signal_update(contents,filenames,last_modified):
     Output("filtered_signal", "figure"),
     Output('upload-data', 'interval'),
 
-    Input("store_zeros", "data"),
-    Input("store_poles", "data"),
+    Input("store_corrected_zeros", "data"),
+    Input("store_corrected_poles", "data"),
     Input("speed_slider", "value"),
     Input("interval_component", "n_intervals"),
     Input("interval_component", "disabled"),
@@ -164,9 +165,10 @@ def Signal_update(zeros,poles, speed,n,disabled,time,mag,interval):
     filter=Filter()
 
     for i in zeros:
-            filter.add_zero(complex(i))
+        filter.add_zero(complex(i))
     for i in poles:
         filter.add_pole(complex(i))
+
     print ("interval")
     print(interval)
     print("store") 
@@ -198,11 +200,13 @@ def Signal_update(zeros,poles, speed,n,disabled,time,mag,interval):
         filtred_mag=filter.filter_samples(mag[pointsToAppendOld:pointsToAppend])
 
 
-        
+        print(filtred_mag)
 
-        time_x=time[pointsToAppendOld:pointsToAppend]
-        updating_figure_implement(figure=signal_fig,x=time_x,y=mag[pointsToAppendOld:pointsToAppend])
-        updating_figure_implement(figure=filterd_signal_fig,x=time_x,y=filtred_mag[pointsToAppendOld:pointsToAppend])
+        updating_figure_implement(figure=signal_fig,x=time[pointsToAppendOld:pointsToAppend],y=mag[pointsToAppendOld:pointsToAppend])
+
+        signal_fig.update_layout(xaxis_range=[time[pointsToAppendOld], time[pointsToAppend]])
+
+        updating_figure_implement(figure=filterd_signal_fig,x=time[pointsToAppendOld:pointsToAppend],y=filtred_mag[pointsToAppendOld:pointsToAppend])
         
             
 
