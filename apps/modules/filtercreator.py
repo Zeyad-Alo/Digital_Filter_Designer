@@ -149,10 +149,12 @@ class Filter():
     # TODO must work with conjugates and updaters
     def edit_pole(self, pole, new_pole):
         self.filter_poles[pole] = new_pole
+        self.update_filter_from_zeropole()
 
     # TODO must work with conjugates and updaters
     def edit_zero(self, zero, new_zero):
         self.filter_zeros[zero] = new_zero
+        self.update_filter_from_zeropole()
 
     def filter_type(self):
         if len(self.filter_poles) == 0:

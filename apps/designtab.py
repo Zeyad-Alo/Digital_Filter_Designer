@@ -71,7 +71,12 @@ def  updating_all_figures():
 zplane_card = dbc.Card(
     [
         dbc.CardHeader("Z-Plane"),
-        dbc.CardBody(dcc.Graph(id='z_plane', figure= init_zplane_plot()), className = "p-0"
+        dbc.CardBody(dcc.Graph(id='z_plane', figure= init_zplane_plot(), config={
+            'editable': True,
+            'edits': {
+                'shapePosition': True
+            }
+        }), className = "p-0"
     )],
     )
 
@@ -216,8 +221,9 @@ SAMPLING_FREQ=44100
     Input("dropdown_all","n_clicks"),
 
     Input("z_plane", "clickData"),
+    [Input('z_plane', 'relayoutData')]
 )
-def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,delete_click,activated,zclicks,pclicks,allclicks,clicked_data):
+def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,delete_click,activated,zclicks,pclicks,allclicks,clicked_data, relayout):
     num=[]
     den=[]
     real_num=[]
@@ -309,24 +315,32 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
 
 
     if clicked_data is not None:
+        print(clicked_data)
         #TODO: handle if the arrays of zeros and poles are empty
         #print("clicked data")
         #print(clicked_data)
         data=clicked_data['points'][0]['curveNumber']
         y=clicked_data['points'][0]['y']
         x=clicked_data['points'][0]['x']
+        z_plane_fig.add_shape(type="circle", fillcolor = "#7f7f7f", line={'width':0}, opacity=0.3, x0=x-0.07, x1=x+0.07, y0=y-0.07, y1=y+0.07)
         if data == 1 and 'delete_button' in changed_id:
             filter.remove_zero(x+y*1j)
+            z_plane_fig.plotly_relayout({'shapes': []})
            
             # if 'conj_checklist' in changed_id and activated:
             #     filter.conjugate_zeros.remove(input)
-            #     # filter.remove_conjugate(polezero='zero',input=conjugate(x+y*1j))
+            #     # filter.remove_conjugate(polezero='zero',input=conjugate(x+y*1j))        z_plane_fig.add_shape(type="circle", fillcolor = "white")
         elif data == 2 and 'delete_button' in changed_id:
             filter.remove_pole(x+y*1j)
+            z_plane_fig.plotly_relayout({'shapes': []})
            
             # if 'conj_checklist' in changed_id and activated:
             #     filter.remove_conjugate(polezero='pole',input=conjugate(x+y*1j))
+        print(relayout)
         updating_all_figures()
+
+    if ctx.triggered_prop_ids == "z_plane.relayoutData":
+        print("k")
     
     clicked_data = None
 
