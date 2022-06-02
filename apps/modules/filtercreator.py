@@ -4,6 +4,10 @@ from scipy import signal as sg
 from dataclasses import dataclass, asdict, field
 import copy
 import numpy as np
+<<<<<<< HEAD
+=======
+
+>>>>>>> 96b89a2fa5a7c2d6c7ec03786ee98b6d7121229c
 @dataclass
 class Filter():
     filter_poles: list = field(default_factory=list, repr=True)
@@ -12,7 +16,15 @@ class Filter():
     conjugate_enable: bool = field(default=False, repr=False)
     conjugate_poles: list = field(default_factory=list, repr=False)
     conjugate_zeros: list = field(default_factory=list, repr=False)
+<<<<<<< HEAD
     sampling_freq: int = 600
+=======
+    ###### 3adyy ?
+    temp_conjugate_poles: list = field(default_factory=list, repr=False)
+    temp_conjugate_zeros: list = field(default_factory=list, repr=False) 
+
+    sampling_freq: int = 44100
+>>>>>>> 96b89a2fa5a7c2d6c7ec03786ee98b6d7121229c
     filter_type: str = field(default_factory=list, repr=False)
 
     numerator: list = field(default_factory=list, repr=False)
@@ -58,14 +70,18 @@ class Filter():
             
             self.filter_pole_new=list(set(self.filter_poles).symmetric_difference(set(self.conjugate_poles)))
             self.filter_zeros_new=list(set(self.filter_zeros).symmetric_difference(set(self.conjugate_zeros)))
-        
+            
             temp_filter_poles=copy.copy(self.filter_poles)
             temp_filter_zeros=copy.copy(self.filter_zeros)
+            
+
+
 
             for pole in temp_filter_poles:
                 self.add_conjugate('Pole', pole)
             for zero in  temp_filter_zeros:
                 self.add_conjugate('Zero', zero)
+               
         else:
             for pole in self.conjugate_poles:
                 self.filter_poles.remove(pole)
@@ -74,7 +90,7 @@ class Filter():
 
             self.conjugate_poles = []
             self.conjugate_zeros = []
-
+            
         self.update_filter_from_zeropole()
 
     # TODO
@@ -104,18 +120,21 @@ class Filter():
     # TODO
     def add_conjugate(self, pole_zero='Pole', input=None):
         print("entered  add_conjgate    aaaaaa ")
-        if pole_zero == 'Pole':
-            # if input is None:
-            #     return
-            self.conjugate_poles.append(conjugate(input))
-            self.filter_poles.append(conjugate(input))
+        if np.imag(input)==0 :  
             return
-        elif pole_zero == 'Zero':
-            # if input is None:
-            #     return
-            self.conjugate_zeros.append(conjugate(input))
-            self.filter_zeros.append(conjugate(input))
-            return
+        else:
+            if pole_zero == 'Pole':
+                if input is None:
+                    raise Exception('No pole input')
+                self.conjugate_poles.append(conjugate(input))
+                self.filter_poles.append(conjugate(input))
+                return
+            elif pole_zero == 'Zero':
+                if input is None:
+                    raise Exception('No zero input')
+                self.conjugate_zeros.append(conjugate(input))
+                self.filter_zeros.append(conjugate(input))
+                return
     # DONE
 
     def enable_conjugates(self, boolean: bool = False):
@@ -125,13 +144,22 @@ class Filter():
     # TODO must work with conjugates
 
     def remove_pole(self, pole):
-        self.filter_poles.remove(pole)
-        self.update_conjugates()
+        if self.conjugate_enable:
+            self.filter_poles.remove(pole)
+            self.remove_conjugate(polezero='Pole',input=conjugate(pole))
+            # self.update_conjugates()
+        else:
+            self.filter_poles.remove(pole)
 
     # TODO must work with conjugates
     def remove_zero(self, zero):
-        self.filter_zeros.remove(zero)
-        self.update_conjugates()
+        if self.conjugate_enable:
+            self.filter_zeros.remove(zero)
+            self.remove_conjugate(polezero='Zero',input=conjugate(zero))
+            
+            # self.update_conjugates()
+        else:
+            self.filter_zeros.remove(zero)
 
     # TODO
     def remove_conjugate(self, polezero='Pole', input=None):
