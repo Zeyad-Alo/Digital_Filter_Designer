@@ -12,7 +12,7 @@ import cmath
 import math 
 from apps.modules import filtercreator
 from scipy import signal as sg
-
+from numpy import conjugate
 zeros_all_conj=[]
 poles_all_conj=[]
 #object
@@ -57,13 +57,13 @@ def updating_figure_desgin(figure=None,data_index=0,x=[],y=[],symbol='circle-ope
     if figure==z_plane_fig:
         scatter.marker.symbol=symbol
     
-def updating_all_figures(): 
-    magnitude_response,phase_response,w,num,den=filter.get_magnitude_phase_response()
+def  updating_all_figures(): 
+    
     updating_figure_desgin(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
     updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
 
-    updating_figure_desgin(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
-    updating_figure_desgin(figure=phase_fig,data_index=0,x=w,y=phase_response)   
+    updating_figure_desgin(figure=magnitude_fig,data_index=0,x=filter.w,y=filter.filter_magnitude_response)
+    updating_figure_desgin(figure=phase_fig,data_index=0,x=filter.w,y=filter.filter_phase_response)   
 
 
 #   PS: CARDS ARE UI ELEMENTS ONLY THE ORGANIZE FUNCTIONAL CONTENT
@@ -120,8 +120,6 @@ collapse = html.Div(
     ]
 )
 
-
-
 #   OPTIONS (PREFERENCES) CARD BELOW ZPLANE
 options_card = dbc.Card(
     [
@@ -130,9 +128,9 @@ options_card = dbc.Card(
         dbc.CardFooter(
         dbc.Row([
             dbc.Col(dbc.Switch(id = 'conj_checklist', label = "Add Conjugates")),
-            dbc.Col(dbc.Button("Apply!", id = 'apply_button', color="primary", size='sm'), width=3),
+            dbc.Col(dbc.Button(html.I(className="bi bi-trash-fill"), id = 'delete_button', color="dark", size='sm'), width=1),
             ]),
-        style={'padding-left': '10px', 'padding-right':'20px'}
+        style={'padding-left': '10px', 'margin-right':'20px'}
     )],
 )
 
@@ -208,7 +206,7 @@ SAMPLING_FREQ=44100
     Input("theta_slider", "value"),
     State("zeros_button", "active"),
     State("poles_button", "active"),
-    Input("apply_button","n_clicks"),
+    Input("delete_button","n_clicks"),
     Input("conj_checklist","value"),
     Input("dropdown_zeros","n_clicks"),
     Input("dropdown_poles","n_clicks"),
@@ -216,7 +214,7 @@ SAMPLING_FREQ=44100
 
     Input("z_plane", "clickData"),
 )
-def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,apply_click,activated,zclicks,pclicks,allclicks,clicked_data):
+def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,delete_click,activated,zclicks,pclicks,allclicks,clicked_data):
     num=[]
     den=[]
     real_num=[]
@@ -231,153 +229,100 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
     z_axis=cmath.rect(mag_value,(theta_value*np.pi/180))
     #this loop is entred when both the zeros button is open and the user pressed add
     if z_active and 'add_button' in changed_id:
-        print("zeros")
+        #print("zeros")
         filter.add_zero(z_axis)
         
         updating_figure_desgin(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
         #this loop is entred when both the poles button is open and the user pressed add
     elif p_active and 'add_button' in changed_id:
-        print("poles")
-        filter.add_pole( z_axis)
-
+        #print("poles")
+        filter.add_pole(z_axis)
+        print("THHHHHHHHHe filter")
+        # print(filter.get_filter_dict())
         updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
 
 
     if 'add_button' in changed_id:  
-        print("phase and mag resp")
-        magnitude_response,phase_response,w,num,den = filter.get_magnitude_phase_response() 
-        updating_figure_desgin(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
+        #print("phase and mag resp")
+        # magnitude_response,phase_response,w,num,den = filter.get_magnitude_phase_response() 
+        # updating_figure_desgin(figure=magnitude_fig,data_index=0,x=w,y=magnitude_response)
         
-        updating_figure_desgin(figure=phase_fig,data_index=0,x=w,y=phase_response)
+        # updating_figure_desgin(figure=phase_fig,data_index=0,x=w,y=phase_response)
+        updating_figure_desgin(figure=magnitude_fig,data_index=0,x=filter.w,y=filter.filter_magnitude_response)
+        updating_figure_desgin(figure=phase_fig,data_index=0,x=filter.w,y=filter.filter_phase_response)
     
-    if activated and 'apply_button' in changed_id  :  
-        #TODO PHASE/MAG RESPONSE GETS UPDATED EVEN IF THERE ALL CONJUGETS ARE PRESENT
-        mag=[]
-        phase=[]
-        print("activated and apply_button")
-        for z1 in filter.filter_zeros:
-            for z2 in filter.filter_zeros:
-                print("z1:")
-                print(z1)
-                print("z2")
-                print(z2)
-                #if the conjugets of the elements are present
-                if( (z1.real == z2.real )and( z2.imag == - z1.imag) ):
-                    print("zeros same")
-                    break
-                else:
-                    print("zeros not same")
-                    z_conj=np.conj(z1) 
-                    print(z_conj)
-                    zeros_all_conj.append(z_conj)
-     
-        for p1 in filter.filter_poles:
-            for p2 in filter.filter_poles:
-                #if the conjugets of the elements are present
-                if (p1.real == p2.real )and( p2.imag == - p1.imag):
-                    break
-                else:
-                    p_conj=np.conj(p1)
-                    poles_all_conj.append(p_conj)
+    if 'conj_checklist' in changed_id and activated:  
         
-        for z in zeros_all_conj:
-            filter.add_zero(z)
-
-        for p in poles_all_conj:
-            filter.add_pole(p)
-
+        print("enabled  TRUE")
+        filter.enable_conjugates(True)
+        updating_all_figures()
+   
+    elif  'conj_checklist' in changed_id and not activated :
+        print("enabled  FALSE")
+        filter.enable_conjugates(False)
         updating_all_figures()
 
-
+    
     if 'dropdown_zeros' in changed_id:
-        print("zeros_clear")
-        for z in filter.filter_zeros:
-            filter.remove_zero(z)
-
-        print(filter.filter_zeros)
-        filter.edit_zero(0,0)
-        print(filter.filter_zeros)
-
+      
+        filter.clear_zeros()
         updating_all_figures()
        
 
     elif 'dropdown_poles' in changed_id:
-        print("poles_clear")
-        for p in filter.filter_poles:
-            filter.remove_pole(p)
-
-        print(filter.filter_poles)
-        filter.edit_pole(0,0)
-        print(filter.filter_poles)
-        
+   
+        filter.clear_poles()
         updating_all_figures()
         
 
     elif 'dropdown_all' in changed_id:
-        for z in filter.filter_zeros:
-            filter.remove_zero(z)
-        for p in filter.filter_poles:
-            filter.remove_pole(p)
         
-
-#/why edit used ?
-        filter.edit_zero(0,0)
-        print(filter.filter_zeros)
-
-        filter.edit_pole(0,1+1j)
-        print(filter.filter_poles)
-
-        updating_all_figures()       
+        filter.clear_filter()
+        updating_all_figures() 
+          
        
-
-
-    print("here")
     # for storing DASH CANNOT PROCESS COMPLEX NUMBERS
-    if len(num) == 0 and len(den) ==0:
-        print("list data")
-        print(type(real_num))
-        print(type(real_den))
-        print(real_num)
-        print(real_den)
-        print(imag_num)
-        print(imag_den)
-    else:
-        print("numpy data")
-        print(num)
-        print(den)
+    # if len(num) == 0 and len(den) ==0:
 
-        real_num=np.real(num)
-        imag_num=np.imag(num)
+    #     real_num=np.real(num)
+    #     imag_num=np.imag(num)
 
-        real_den=np.real(den)
-        imag_den=np.imag(den)
+    #     real_den=np.real(den)
+    #     imag_den=np.imag(den)
 
-        real_num=real_num.tolist()
-        imag_num=imag_num.tolist()
+    #     real_num=real_num.tolist()
+    #     imag_num=imag_num.tolist()
 
-        real_den=real_den.tolist()
-        imag_den=imag_den.tolist()
+    #     real_den=real_den.tolist()
+    #     imag_den=imag_den.tolist()
 
-        print(type(real_num))
-        print(type(real_den))
-        print(real_num)
-        print(real_den)
-        print(imag_num)
-        print(imag_den)
+        #print(type(real_num))
+        #print(type(real_den))
+        #print(real_num)
+        #print(real_den)
+        #print(imag_num)
+        #print(imag_den)
     
+
 
     if clicked_data is not None:
         #TODO: handle if the arrays of zeros and poles are empty
-        print("clicked data")
-        print(clicked_data)
+        #print("clicked data")
+        #print(clicked_data)
         data=clicked_data['points'][0]['curveNumber']
         y=clicked_data['points'][0]['y']
         x=clicked_data['points'][0]['x']
-        if data == 1:
+        if data == 1 and 'delete_button' in changed_id:
             filter.remove_zero(x+y*1j)
-        elif data == 2:
+           
+            # if 'conj_checklist' in changed_id and activated:
+            #     filter.conjugate_zeros.remove(input)
+            #     # filter.remove_conjugate(polezero='zero',input=conjugate(x+y*1j))
+        elif data == 2 and 'delete_button' in changed_id:
             filter.remove_pole(x+y*1j)
-
+           
+            # if 'conj_checklist' in changed_id and activated:
+            #     filter.remove_conjugate(polezero='pole',input=conjugate(x+y*1j))
         updating_all_figures()
     
     clicked_data = None
