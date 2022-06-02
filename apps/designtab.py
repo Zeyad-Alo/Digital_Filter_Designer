@@ -43,6 +43,7 @@ def init_zplane_plot():
     #data 2 for poles points
     z_plane_fig.add_scatter(x=[],y=[],mode="markers")
     z_plane_fig.data[2].marker.symbol = 'x-thin-open'
+    z_plane_fig.update_xaxes(scaleanchor="y")
     
     z_plane_fig.update(layout_showlegend=False)
     # this is returned in the 'figure=' of the zplane plot (look for the z plane card)
@@ -201,6 +202,8 @@ SAMPLING_FREQ=44100
     Output("store_num_imag", "data"),
     Output("store_den_real", "data"),
     Output("store_den_imag", "data"),
+    Output("store_zeros", "data"),
+    Output("store_poles", "data"),
     Input("add_button","n_clicks"),
     Input("mag_slider", "value"),
     Input("theta_slider", "value"),
@@ -329,4 +332,10 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
 
     # we return the figure in the "figure =" of zplot (find z plot card)
     #changing the array to list so the data in store id is right
-    return z_plane_fig,magnitude_fig,phase_fig, real_num,imag_num,real_den,imag_den
+    zeros = []
+    poles = []
+    for i in filter.get_filter_dict()['filter_zeros']:
+        zeros.append(str(i))
+    for i in filter.get_filter_dict()['filter_poles']:
+        poles.append(str(i))
+    return z_plane_fig,magnitude_fig,phase_fig, real_num,imag_num,real_den,imag_den, zeros, poles

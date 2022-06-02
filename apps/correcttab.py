@@ -7,6 +7,7 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import cmath
+from apps.modules import filtercreator
 from scipy import signal as sg
 
 
@@ -15,7 +16,7 @@ allpass_zplane_fig = go.FigureWidget(layout=dict(template='plotly_dark', height 
 allpass_phase_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 0, margin_r = 20, margin_t = 40))
 corrected_phase_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 400, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 
-all_pass_filters_ids = []
+filter=filtercreator.Filter()
 
 
 
@@ -47,19 +48,6 @@ def allpass_zplane_plot():
 #---------------------------------------------------------------------------------------------------------------------
 
 
-
-
-
-
-#---------------------------------------------PHASE RESPONSE------------------------------------------------------------------
-# SHOULD SHOW PAHSE RESPONSE OF SELECTED ALL PASS FILTER
-def plot_2():
-    allpass_phase_fig.add_scatter(x=[],y=[])
-    allpass_phase_fig.update(layout_showlegend=False)
-    return allpass_phase_fig
-
-
-#------------------------------------------------------------------------------------------------------------------------------
 
 
 custom_card = dbc.Collapse(
@@ -107,7 +95,7 @@ all_pass_card = dbc.Card(
     [
         dbc.CardHeader("All Pass Filter"),
         dbc.CardBody([
-            dbc.Row([dbc.Col(dcc.Graph(id='allpass_zplane', figure=allpass_zplane_plot()), style={'padding-left':'0', 'padding-right':'0', 'padding-top':'0', 'margin-top':'0'}),dbc.Col(dcc.Graph(id='allpass_phase', figure=plot_2()), style={'padding-left':'0', 'padding-right':'0'})]),
+            dbc.Row([dbc.Col(dcc.Graph(id='allpass_zplane', figure=allpass_zplane_plot()), style={'padding-left':'0', 'padding-right':'0', 'padding-top':'0', 'margin-top':'0'}),dbc.Col(dcc.Graph(id='allpass_phase', figure=allpass_phase_fig.add_scatter(x=[],y=[])), style={'padding-left':'0', 'padding-right':'0'})]),
             dbc.Row(allpass_filters_lib_card),
             dbc.Row(dbc.Button("Apply!", id = 'apply_button', color="dark", size='sm'))
             ], style={'padding-top':'0', 'padding-right':'12px', 'padding-left':'12px'}),
@@ -116,16 +104,12 @@ all_pass_card = dbc.Card(
 
 
 
-# SHOULD RECIEVE OLD PHASE RESPONSE FROM DESIGN TAB AND APPEND ANY ADDED ALL PASS FILTERS TO IT
-def plot_3():
-    corrected_phase_fig.add_scatter(x=[],y=[])
-    return corrected_phase_fig
 
 corrected_phase_card = dbc.Card(
     [
         dbc.CardHeader("Corrected Phase Response"),
 
-        dbc.CardBody(dcc.Graph(id='original_signal', figure=plot_3()), className = "p-0")
+        dbc.CardBody(dcc.Graph(id='corrected_phase_fig', figure=corrected_phase_fig.add_scatter(x=[],y=[])), className = "p-0")
     ],
     style={'padding-right': '0', 'padding-left': '0'}
 )
@@ -135,6 +119,14 @@ corrected_phase_card = dbc.Card(
 
 def correct_tab_layout():
     layout = html.Div([
+        dbc.Row(dbc.Alert(
+            "Your filter is ready! Upload your signal in the next tab!",
+            id="alert-auto",
+            is_open=False,
+            color="success",
+            duration=4000,
+            style={'height': '50px', 'line-height':'50px', 'padding':'0px 25px'}
+        ), style={'padding-left':'12px', 'padding-right':'12px'}),
         dbc.Row([
             dbc.Col(all_pass_card),
             dbc.Col(corrected_phase_card)
@@ -154,13 +146,13 @@ def correct_tab_layout():
 def add_allpass_to_list(is_open, value, custom_value):
     button_id = ctx.triggered_id
     if value != "custom":
-        create_allpass(complex(value))
+        represent_allpass(complex(value))
         if is_open: return not is_open, allpass_zplane_fig, allpass_phase_fig
         else: return is_open, allpass_zplane_fig, allpass_phase_fig
     elif value == "custom" and button_id == "allpass_dropdown":
         return not is_open, allpass_zplane_fig, allpass_phase_fig
     elif value == "custom" and button_id == "custom_allpass_input":
-        create_allpass(complex(custom_value))
+        represent_allpass(complex(custom_value))
         return is_open, allpass_zplane_fig, allpass_phase_fig
 
 
@@ -170,52 +162,66 @@ list_id = 0
 
 @app.callback(
     Output("allpass_list", "children"),
+    Output("corrected_phase_fig", "figure"),
     State("allpass_dropdown", "value"),
     Input("add_allpass_button", "n_clicks"),
     Input("custom_allpass_input", "value"),
     Input("delete_button", "n_clicks"),
-    #Input(str(list_id), "active"),
-    #State("delete_button", "n_clicks"),
-    State("allpass_list", "children")
+    State("allpass_list", "children"),
+
+    Input("store_zeros", "data"),
+    Input("store_poles", "data"),
     )
-def add_allpass_to_list(value, n_clicks, custom_value, delete_n_clicks, children) :
+def add_allpass_to_list(value, n_clicks, custom_value, delete_n_clicks, children, zeros, poles) :
     button_id = ctx.triggered_id
+
+    if button_id != "allpass_dropdown" and button_id != "add_allpass_button" and button_id != "custom_allpass_input" and button_id != "delete_button":
+        for i in zeros:
+            filter.add_zero(complex(i))
+        for i in poles:
+            filter.add_pole(complex(i))
+        print("store")
 
     if value == "custom" and button_id == "add_allpass_button":
         children.append(dbc.ListGroupItem(custom_value, id={'item':str(n_clicks)}, style={'color':'black'}, action=True, active=False))
+        filter.add_allpass_filter(complex(custom_value))
     elif value != "custom" and button_id == "add_allpass_button":
         children.append(dbc.ListGroupItem(value, id={'item':str(n_clicks)}, style={'color':'black'}, action=True, active=False))
+        filter.add_allpass_filter(complex(value))
         print("3ayel")
     if button_id == "delete_button":
         assassin_child = []
-        print(children)
         for i in children:
-            print(i['props']['active'])
             if i['props']['active']:
                 assassin_child.append(i)
         for i in assassin_child:
             children.remove(i)
+            filter.remove_allpass_filter(complex(i['props']['children']))
+        print(children)
+
+    update_corrected_phase_fig()
+    return children, corrected_phase_fig
 
 
-    print(n_clicks)
-    return children
 
+def represent_allpass(a) :
 
-
-def create_allpass(a) :
-    #factors = np.linspace(-0.99, 0.99, 5)
+    # GET ZERO AND POLE OF ALLPASS AND PLOT ZPLANE
     z, p, k = sg.tf2zpk([-a, 1.0], [1.0, -a])
-
-    w, h = sg.freqz([-a, 1.0], [1.0, -a])
 
     allpass_zplane_fig.data[1].x = np.real(z)
     allpass_zplane_fig.data[1].y = np.imag(z)
     allpass_zplane_fig.data[2].x = np.real(p)
     allpass_zplane_fig.data[2].y = np.imag(p)
 
+
+    # GET W AND H OF ALLPASS AND PLOT ITS PHASE RESPONSE
+    w, h = sg.freqz([-a, 1.0], [1.0, -a])
+
     scatter = allpass_phase_fig.data[0]
     scatter.x = w/max(w)
     scatter.y = np.unwrap(np.angle(h))
+
 
 
 
@@ -227,3 +233,34 @@ def create_allpass(a) :
     )
 def select_allpass(n, active) :
     return not active
+
+
+
+def update_corrected_phase_fig():
+    phase, w = filter.get_phase_response()
+    print(filter.get_filter_dict()['filter_zeros'])
+    scatter = corrected_phase_fig.data[0]
+    scatter.x = w
+    scatter.y = phase
+
+
+
+
+@app.callback(
+    Output("alert-auto", "is_open"),
+    Output("store_corrected_zeros", "data"),
+    Output("store_corrected_poles", "data"),
+    [Input("apply_button", "n_clicks")],
+    [State("alert-auto", "is_open")],
+)
+def toggle_alert(n, is_open):
+    zeros = []
+    poles = []
+    for i in filter.get_filter_dict()['filter_zeros']:
+        zeros.append(str(i))
+    for i in filter.get_filter_dict()['filter_poles']:
+        poles.append(str(i))
+
+    if n:
+        return not is_open, zeros, poles
+    return is_open, zeros, poles
