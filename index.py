@@ -5,6 +5,19 @@ from dash.dependencies import Input, Output
 from apps.home import create_home_page
 from app import app
 
+#FINAL TODO LIST
+#TODO CHANGE STORE TO GET FROM ALLPASS TO FILTER
+#TODO FIX ALL PASS DATA PIPELINE
+#TODO APPLY FILTER NOT FILTERING
+#TODO APPLY FILTER X RANGE AUTO RANGING
+#TODO SPEED NOT WORKING?
+#TODO IMPLEMENT DRAGGING IN Z PLOT
+#TODO UI TWEAKING (CHANGE LAPTOP)
+#TODO SAMPLING FREQUENCY INPUT?
+#TODO TIME RANGE OF PLOTTING
+#TODO FIX ADDING CONJUGATES?
+
+
 server = app.server
 app.config.suppress_callback_exceptions = True
 
@@ -20,7 +33,7 @@ app.layout = dbc.Container(
     className="p-0",
     
     fluid=True,
-                      )
+    )
 
 
 if __name__ == '__main__':

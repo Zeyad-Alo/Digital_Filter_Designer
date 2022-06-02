@@ -4,10 +4,13 @@
 
 .Select {
     background-color: black;
+    color: white;
 }
 
 .dash-dropdown .Select-menu-outer {
     background-color: black;
+    color: white;
+
 }
 
 #custom_allpass input:invalid {
