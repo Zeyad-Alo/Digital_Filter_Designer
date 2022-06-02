@@ -104,8 +104,8 @@ class Filter():
         self.update_filter_from_zeropole()
 
 
-   
     #ADDING A POLE OR A ZERO     
+#TODO  @NASSER bos 3ala el3azamaa
    
     def add_pole_zero(self,pole_or_zero,filter):
         if self.conjugate_enable:
@@ -116,7 +116,7 @@ class Filter():
         self.update_filter_from_zeropole()
 
     # DELETING A POLE OR A ZERO
-
+#TODO  @NASSER bos 3ala el3azamaa
     def remove_pole_zero(self, pole_or_zero, filter):
         if self.conjugate_enable:
             filter.remove(pole_or_zero)
