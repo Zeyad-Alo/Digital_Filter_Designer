@@ -223,11 +223,11 @@ class Filter():
     def filter_samples(self,samples):
         # filter signal 
   
-        
+        filtered_samples=[]
 
         filtered_samples=sg.lfilter(b=self.numerator,a=self.denominator,x=samples)
         
-        return filtered_samples
+        return np.real(filtered_samples)
 
     def get_filter_dict(self):
         return asdict(self)
