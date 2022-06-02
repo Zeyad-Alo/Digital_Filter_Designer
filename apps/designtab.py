@@ -219,7 +219,6 @@ SAMPLING_FREQ=44100
     Input("dropdown_zeros","n_clicks"),
     Input("dropdown_poles","n_clicks"),
     Input("dropdown_all","n_clicks"),
-
     Input("z_plane", "clickData"),
     [Input('z_plane', 'relayoutData')]
 )
@@ -322,18 +321,19 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
         data=clicked_data['points'][0]['curveNumber']
         y=clicked_data['points'][0]['y']
         x=clicked_data['points'][0]['x']
+        
+        #TODO modify the array in index 0 
+        print(z_plane_fig)
         z_plane_fig.add_shape(type="circle", fillcolor = "#7f7f7f", line={'width':0}, opacity=0.3, x0=x-0.07, x1=x+0.07, y0=y-0.07, y1=y+0.07)
         if data == 1 and 'delete_button' in changed_id:
             filter.remove_zero(x+y*1j)
             z_plane_fig.plotly_relayout({'shapes': []})
-           
             # if 'conj_checklist' in changed_id and activated:
             #     filter.conjugate_zeros.remove(input)
             #     # filter.remove_conjugate(polezero='zero',input=conjugate(x+y*1j))        z_plane_fig.add_shape(type="circle", fillcolor = "white")
         elif data == 2 and 'delete_button' in changed_id:
             filter.remove_pole(x+y*1j)
             z_plane_fig.plotly_relayout({'shapes': []})
-           
             # if 'conj_checklist' in changed_id and activated:
             #     filter.remove_conjugate(polezero='pole',input=conjugate(x+y*1j))
         print(relayout)

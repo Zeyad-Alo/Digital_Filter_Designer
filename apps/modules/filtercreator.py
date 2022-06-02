@@ -4,6 +4,7 @@ from scipy import signal as sg
 from dataclasses import dataclass, asdict, field
 import copy
 
+
 @dataclass
 class Filter():
     filter_poles: list = field(default_factory=list, repr=True)
@@ -49,9 +50,7 @@ class Filter():
         self.numerator = num
         self.denominator = den
         self.filter_freq_response = freq_resp
-
         return
-    # TODO CHECK IF ALL POLES HAVE A CONJUGATE OR NOT??
 
     def update_conjugates(self):
         if self.conjugate_enable:
@@ -99,7 +98,6 @@ class Filter():
         else:
             self.filter_zeros.append(zero)
         self.update_filter_from_zeropole()
-        # self.update_conjugates()
 
     # TODO
     def add_conjugate(self, pole_zero='Pole', input=None):
