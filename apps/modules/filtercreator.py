@@ -106,41 +106,24 @@ class Filter():
 
 
    
-    #ADDING A POLE OR A ZERO
-    
-    def add_pole(self, pole):
+    #ADDING A POLE OR A ZERO     
+   
+    def add_pole_zero(self,pole_or_zero,filter):
         if self.conjugate_enable:
-            self.filter_poles.append(pole)
+            filter.append(pole_or_zero)
             self.update_conjugates()
         else:
-            self.filter_poles.append(pole)
-        self.update_filter_from_zeropole()
-
-    def add_zero(self, zero):
-        if self.conjugate_enable:
-            self.filter_zeros.append(zero)
-            self.update_conjugates()
-
-        else:
-            self.filter_zeros.append(zero)
+            filter.append(pole_or_zero)
         self.update_filter_from_zeropole()
 
     # DELETING A POLE OR A ZERO
 
-    def remove_pole(self, pole):
+    def remove_pole_zero(self, pole_or_zero, filter):
         if self.conjugate_enable:
-            self.filter_poles.remove(pole)
-            self.filter_poles.remove(conjugate(pole))
+            filter.remove(pole_or_zero)
+            filter.remove(conjugate(pole_or_zero))
         else:
-            self.filter_poles.remove(pole)
-        self.update_filter_from_zeropole()
-
-    def remove_zero(self, zero):
-        if self.conjugate_enable:
-            self.filter_zeros.remove(zero)
-            self.filter_zeros.remove(conjugate(zero))
-        else:
-            self.filter_zeros.remove(zero)
+            filter.remove(pole_or_zero)
         self.update_filter_from_zeropole()
 
 
@@ -204,9 +187,6 @@ class Filter():
 
     def filter_samples(self,samples):
         # filter signal 
-  
-        
-
         filtered_samples=sg.lfilter(b=self.numerator,a=self.denominator,x=samples)
         
         return filtered_samples

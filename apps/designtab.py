@@ -233,13 +233,13 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
     #this loop is entred when both the zeros button is open and the user pressed add
     if z_active and 'add_button' in changed_id:
         #print("zeros")
-        filter.add_zero(z_axis)
+        filter.add_pole_zero(z_axis,filter.filter_zeros)
         
         updating_figure_desgin(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
         #this loop is entred when both the poles button is open and the user pressed add
     elif p_active and 'add_button' in changed_id:
         #print("poles")
-        filter.add_pole(z_axis)
+        filter.add_pole_zero(z_axis,filter.filter_poles)
         print("THHHHHHHHHe filter")
         # print(filter.get_filter_dict())
         updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
@@ -316,16 +316,11 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
         y=clicked_data['points'][0]['y']
         x=clicked_data['points'][0]['x']
         if data == 1 and 'delete_button' in changed_id:
-            filter.remove_zero(x+y*1j)
+            filter.remove_pole_zero(x+y*1j,filter.filter_zeros)
            
-            # if 'conj_checklist' in changed_id and activated:
-            #     # filter.conjugate_zeros.remove(input)
-            #     filter.remove_conjugate(polezero='zero',input=conjugate(x+y*1j))
         elif data == 2 and 'delete_button' in changed_id:
-            filter.remove_pole(x+y*1j)
+            filter.remove_pole_zero(x+y*1j,filter.filter_poles)
            
-            # if 'conj_checklist' in changed_id and activated:
-            #     filter.remove_conjugate(polezero='pole',input=conjugate(x+y*1j))
         updating_all_figures()
     
     clicked_data = None
