@@ -12,7 +12,7 @@ import cmath
 import math 
 from apps.modules import filtercreator
 from scipy import signal as sg
-
+from numpy import conjugate
 zeros_all_conj=[]
 poles_all_conj=[]
 #object
@@ -217,7 +217,7 @@ SAMPLING_FREQ=44100
 
     Input("z_plane", "clickData"),
 )
-def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,apply_click,activated,zclicks,pclicks,allclicks,clicked_data):
+def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,delete_click,activated,zclicks,pclicks,allclicks,clicked_data):
     num=[]
     den=[]
     real_num=[]
@@ -307,6 +307,7 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         #print(imag_den)
     
 
+
     if clicked_data is not None:
         #TODO: handle if the arrays of zeros and poles are empty
         #print("clicked data")
@@ -314,11 +315,17 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,appl
         data=clicked_data['points'][0]['curveNumber']
         y=clicked_data['points'][0]['y']
         x=clicked_data['points'][0]['x']
-        if data == 1:
+        if data == 1 and 'delete_button' in changed_id:
             filter.remove_zero(x+y*1j)
-        elif data == 2:
+           
+            # if 'conj_checklist' in changed_id and activated:
+            #     filter.conjugate_zeros.remove(input)
+            #     # filter.remove_conjugate(polezero='zero',input=conjugate(x+y*1j))
+        elif data == 2 and 'delete_button' in changed_id:
             filter.remove_pole(x+y*1j)
-
+           
+            # if 'conj_checklist' in changed_id and activated:
+            #     filter.remove_conjugate(polezero='pole',input=conjugate(x+y*1j))
         updating_all_figures()
     
     clicked_data = None
