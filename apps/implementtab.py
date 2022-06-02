@@ -145,8 +145,8 @@ def Signal_update(contents,filenames,last_modified):
     Output("filtered_signal", "figure"),
     Output('upload-data', 'interval'),
 
-    Input("store_zeros", "data"),
-    Input("store_poles", "data"),
+    Input("store_corrected_zeros", "data"),
+    Input("store_corrected_poles", "data"),
     Input("speed_slider", "value"),
     Input("interval_component", "n_intervals"),
     Input("interval_component", "disabled"),
@@ -199,10 +199,9 @@ def Signal_update(zeros,poles, speed,n,disabled,time,mag,interval):
 
 
         
-
-        time_x=time[pointsToAppendOld:pointsToAppend]
-        updating_figure_implement(figure=signal_fig,x=time_x,y=mag[pointsToAppendOld:pointsToAppend])
-        updating_figure_implement(figure=filterd_signal_fig,x=time_x,y=filtred_mag[pointsToAppendOld:pointsToAppend])
+        updating_figure_implement(figure=signal_fig,x=time[pointsToAppendOld:pointsToAppend],y=mag[pointsToAppendOld:pointsToAppend])
+        signal_fig.update_layout(xaxis_range=[time[pointsToAppendOld-1], time[pointsToAppend]])
+        updating_figure_implement(figure=filterd_signal_fig,x=time[pointsToAppendOld:pointsToAppend],y=filtred_mag[pointsToAppendOld:pointsToAppend])
         
             
 
