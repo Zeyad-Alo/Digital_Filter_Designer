@@ -126,6 +126,7 @@ class Filter():
             self.update_conjugates()
         else:
             self.filter_poles.append(pole)
+        self.update_filter_from_zeropole()
         # self.update_conjugates()
 
     # TODO
@@ -137,6 +138,7 @@ class Filter():
 
         else:
             self.filter_zeros.append(zero)
+        self.update_filter_from_zeropole()
         # self.update_conjugates()
 
     # TODO
@@ -228,15 +230,17 @@ class Filter():
     # TODO @zeyad make this work with allpass filters, should store the modification in poles and zeros
     # and also in allpass zeros and poles to be able to remove them whenever we want to from the original poles and zeros
     def remove_allpass_filter(self, complex):
-        # self.filter_poles.remove(complex)
-        # self.filter_zeros.remove(complex)
-        pass
+        z, p, k = sg.tf2zpk([-complex, 1.0], [1.0, -complex])
+        self.filter_poles.remove(p)
+        self.filter_zeros.remove(z)
+        self.update_filter_from_zeropole()
 
     # TODO @zeyad make this work with allpass filters
     def add_allpass_filter(self, complex):
-        # self.filter_poles.append(complex)
-        # self.filter_zeros.append(complex)
-        pass
+        z, p, k = sg.tf2zpk([-complex, 1.0], [1.0, -complex])
+        self.filter_poles.append(p[0])
+        self.filter_zeros.append(z[0])
+        self.update_filter_from_zeropole()
 
     def filter_samples(self, samples):
         # filter signal here using obtained impulse response equation

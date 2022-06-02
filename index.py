@@ -15,7 +15,7 @@ app.layout = dbc.Container(
                     className="text-center bg-dark text-white p-2",
                 ),
         create_home_page(),dcc.Store(id='store_num_real'),dcc.Store(id='store_den_real'),dcc.Store(id='store_num_imag'),dcc.Store(id='store_den_imag'),
-        dcc.Store(id='store_zeros'), dcc.Store(id='store_poles')
+        dcc.Store(id='store_zeros'), dcc.Store(id='store_poles'), dcc.Store(id='store_corrected_zeros'), dcc.Store('store_corrected_poles')
     ],
     className="p-0",
     
