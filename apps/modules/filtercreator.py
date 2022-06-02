@@ -4,10 +4,7 @@ from scipy import signal as sg
 from dataclasses import dataclass, asdict, field
 import copy
 import numpy as np
-<<<<<<< HEAD
-=======
 
->>>>>>> 96b89a2fa5a7c2d6c7ec03786ee98b6d7121229c
 @dataclass
 class Filter():
     filter_poles: list = field(default_factory=list, repr=True)
@@ -16,15 +13,7 @@ class Filter():
     conjugate_enable: bool = field(default=False, repr=False)
     conjugate_poles: list = field(default_factory=list, repr=False)
     conjugate_zeros: list = field(default_factory=list, repr=False)
-<<<<<<< HEAD
     sampling_freq: int = 600
-=======
-    ###### 3adyy ?
-    temp_conjugate_poles: list = field(default_factory=list, repr=False)
-    temp_conjugate_zeros: list = field(default_factory=list, repr=False) 
-
-    sampling_freq: int = 44100
->>>>>>> 96b89a2fa5a7c2d6c7ec03786ee98b6d7121229c
     filter_type: str = field(default_factory=list, repr=False)
 
     numerator: list = field(default_factory=list, repr=False)
