@@ -9,7 +9,8 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import cmath
-import math 
+import math
+import json
 from apps.modules import filtercreator
 from scipy import signal as sg
 from numpy import conjugate
@@ -62,7 +63,7 @@ def  updating_all_figures():
     
     updating_figure_desgin(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
     updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
-
+    
     updating_figure_desgin(figure=magnitude_fig,data_index=0,x=filter.w,y=filter.filter_magnitude_response)
     updating_figure_desgin(figure=phase_fig,data_index=0,x=filter.w,y=filter.filter_phase_response)   
 
@@ -164,7 +165,8 @@ def design_tab_layout():
         dbc.Row([
             dbc.Col([zplane_card,html.Br(), options_card], width=3),
             dbc.Col([mag_card, html.Br(), phase_card])
-            ])
+            ]),
+        html.Pre(id='relayout-data')
         ],            
                       )
     return layout
@@ -223,7 +225,7 @@ SAMPLING_FREQ=44100
     Input("z_plane", "clickData"),
     [Input('z_plane', 'relayoutData')]
 )
-def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,delete_click,activated,zclicks,pclicks,allclicks,clicked_data, relayout):
+def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,delete_click,activated,zclicks,pclicks,allclicks,clicked_data, relayoutData):
     num=[]
     den=[]
     real_num=[]
@@ -314,8 +316,9 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
     
 
 
-    if clicked_data is not None:
-        print(clicked_data)
+    if clicked_data is not None and ctx.triggered[0]['value'] != None and ctx.triggered[0]['value'] != {'autosize': True}:
+        print(ctx.triggered)
+        #print(clicked_data)
         #TODO: handle if the arrays of zeros and poles are empty
         #print("clicked data")
         #print(clicked_data)
@@ -326,6 +329,7 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
         if data == 1 and 'delete_button' in changed_id:
             filter.remove_zero(x+y*1j)
             z_plane_fig.plotly_relayout({'shapes': []})
+            updating_all_figures()
            
             # if 'conj_checklist' in changed_id and activated:
             #     filter.conjugate_zeros.remove(input)
@@ -336,12 +340,24 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
            
             # if 'conj_checklist' in changed_id and activated:
             #     filter.remove_conjugate(polezero='pole',input=conjugate(x+y*1j))
-        print(relayout)
-        updating_all_figures()
+            updating_all_figures()
 
-    if ctx.triggered_prop_ids == "z_plane.relayoutData":
-        print("k")
-    
+        if ctx.triggered[0]['value'] != None and ctx.triggered[0]['value'] != {'autosize': True} and ctx.triggered_id == 'z_plane' and 'shapes[0].y0' in ctx.triggered[0]['value']:
+            data=clicked_data['points'][0]['curveNumber']
+            y=clicked_data['points'][0]['y']
+            x=clicked_data['points'][0]['x']
+            if data == 1:
+                filter.edit_zero(x+y*1j, ctx.triggered[0]['value']['shapes[0].x0']+ ctx.triggered[0]['value']['shapes[0].y0']*1j)
+                #print(filter.get_filter_dict()['filter_zeros'])
+            elif data == 2:
+                filter.edit_pole(x+y*1j, ctx.triggered[0]['value']['shapes[0].x0']+ ctx.triggered[0]['value']['shapes[0].y0']*1j)
+                #print(filter.get_filter_dict()['filter_zeros'])
+            z_plane_fig.plotly_relayout({'shapes': []})
+            updating_all_figures()
+                
+
+
+    print(z_plane_fig.layout.shapes)
     clicked_data = None
 
     # we return the figure in the "figure =" of zplot (find z plot card)
@@ -353,3 +369,16 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
     for i in filter.get_filter_dict()['filter_poles']:
         poles.append(str(i))
     return z_plane_fig,magnitude_fig,phase_fig, real_num,imag_num,real_den,imag_den, zeros, poles
+
+
+
+@app.callback(
+    Output('relayout-data', 'children'),
+    [Input('z_plane', 'relayoutData')])
+def display_selected_data(relayoutData):
+    if ctx.triggered[0]['value'] != None and ctx.triggered[0]['value'] != {'autosize': True} and 'shapes[0].y0' in ctx.triggered[0]['value']:
+        print(ctx.triggered_id)
+        #print(ctx.triggered_prop_ids)
+        print(ctx.triggered[0]['value']['shapes[0].x0'])
+        #print(relayoutData)
+        return json.dumps(relayoutData, indent=2)
