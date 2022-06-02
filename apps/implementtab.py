@@ -12,6 +12,7 @@ import datetime
 import io
 import pandas as pd
 import cmath
+from apps.modules.filtercreator import Filter
 signal_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 filterd_signal_fig= go.FigureWidget(layout=dict(template='plotly_dark', height = 300, margin_b = 40, margin_l = 40, margin_r = 40, margin_t = 40))
 
@@ -33,7 +34,7 @@ filtered_signal_card = dbc.Card(
         dbc.CardFooter(
             dbc.Row([
                 dbc.Col(dcc.Markdown('Speed', className="p-0"), width=1),
-                dbc.Col(dcc.Slider(1, 100, value=1, marks=None, id = 'speed_slider',
+                dbc.Col(dcc.Slider(0, 50, value=0, marks=None, id = 'speed_slider',
     tooltip={"placement": "bottom", "always_visible": False}, className="p-0"), style={'padding-top':'8px'})
                 ]),
             )
@@ -104,10 +105,13 @@ def parse_contents(contents, filename, date):
 @app.callback(
     Output("time_data", "data"),
     Output("mag_data", "data"),
+    
 
     Input('upload-data', 'contents'),
     State('upload-data', 'filename'),
     State('upload-data', 'last_modified'),
+    
+
 )
 
 def Signal_update(contents,filenames,last_modified):
@@ -129,6 +133,7 @@ def Signal_update(contents,filenames,last_modified):
     print(len(time))
     print(len(mag))
 
+
     return  time,mag
 
 
@@ -138,61 +143,71 @@ def Signal_update(contents,filenames,last_modified):
 @app.callback(
     Output("original_signal", "figure"),
     Output("filtered_signal", "figure"),
+    Output('upload-data', 'interval'),
 
-
-    Input("store_num_real", "data"),
-    Input("store_num_imag", "data"),
-    Input("store_den_real", "data"),
-    Input("store_den_imag", "data"),
+    Input("store_zeros", "data"),
+    Input("store_poles", "data"),
     Input("speed_slider", "value"),
     Input("interval_component", "n_intervals"),
     Input("interval_component", "disabled"),
     Input("time_data", "data"),
     Input("mag_data", "data"),
+    State('upload-data', 'interval'),
     
 )
 
-def Signal_update(num_real,num_imag,den_real,den_imag,speed,n,disabled,time,mag):
+def Signal_update(zeros,poles, speed,n,disabled,time,mag,interval):
     #TODO DONT FORGET TIME PROGRESS
     time=np.array(time)
     mag=np.array(mag)
-    num=[]
-    den=[]
+    
+    filter=Filter()
+
+    for i in zeros:
+            filter.add_zero(complex(i))
+    for i in poles:
+        filter.add_pole(complex(i))
+    print ("interval")
+    print(interval)
+    print("store") 
+    if speed >0:
+        interval= int(1000*speed)
+
+
     
     if len(time)!=0:
        
         print("UPDATING FIGURE")
-
-        for i,r in enumerate(num_real):
-            num.append(r + num_imag[i]*1j)
-      
-        for i,r in enumerate(den_real):
-            den.append(r + den_imag[i]*1j)
-        print("num,den")
-        print(num)
-        print(den)
-        filterd_signal=sg.lfilter(num,den,mag)
-        filterd_mag=[]
-        for h in filterd_signal:
-            freqs=cmath.polar(h)
-            filterd_mag.append(freqs[0])
-        
-        # len(time) will tell me how many sampels do i have 
+       
         print("time length")
         print(len(time))
   
-        pointsToAppend  = 500*speed*n
-        pointsToAppendOld= pointsToAppend - 500*speed*n
-        time_x=time[pointsToAppendOld:pointsToAppend]
+        
 
+        pointsToAppend  = 500*n
+        pointsToAppendOld= pointsToAppend - 500*n
+
+        #delay_start= pointsToAppendOld -filter.get_delay_count()
+
+        #if delay_start<0:
+
+            #mag_delay=[]
+        #else:
+            #mag_delay=mag[delay_start:pointsToAppendOld]
+
+        filtred_mag=filter.filter_samples(mag[pointsToAppendOld:pointsToAppend])
+
+
+        
+
+        time_x=time[pointsToAppendOld:pointsToAppend]
         updating_figure_implement(figure=signal_fig,x=time_x,y=mag[pointsToAppendOld:pointsToAppend])
-        signal_fig.update_layout(xaxis_range=[time_x[0], time_x[-1]])
-        updating_figure_implement(figure=filterd_signal_fig,x=time_x,y=filterd_mag[pointsToAppendOld:pointsToAppend])
-        filterd_signal_fig.update_layout(xaxis_range=[time_x[0], time_x[-1]])
+        updating_figure_implement(figure=filterd_signal_fig,x=time_x,y=filtred_mag[pointsToAppendOld:pointsToAppend])
+        
             
 
     elif len(time)==0:
         
         print("lasa mad5lsh 7aga")
-    return  signal_fig,filterd_signal_fig
+    return  signal_fig,filterd_signal_fig,interval
 

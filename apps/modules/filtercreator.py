@@ -3,7 +3,7 @@ from numpy import conjugate
 from scipy import signal as sg
 from dataclasses import dataclass, asdict, field
 import copy
-
+import numpy as np
 @dataclass
 class Filter():
     filter_poles: list = field(default_factory=list, repr=True)
@@ -12,7 +12,7 @@ class Filter():
     conjugate_enable: bool = field(default=False, repr=False)
     conjugate_poles: list = field(default_factory=list, repr=False)
     conjugate_zeros: list = field(default_factory=list, repr=False)
-    sampling_freq: int = 44100
+    sampling_freq: int = 600
     filter_type: str = field(default_factory=list, repr=False)
 
     numerator: list = field(default_factory=list, repr=False)
@@ -198,14 +198,22 @@ class Filter():
     # TODO @zeyad make this work with allpass filters
     def add_allpass_filter(self, complex):
         z, p, k = sg.tf2zpk([-complex, 1.0], [1.0, -complex])
+
         self.filter_poles.append(p[0])
         self.filter_zeros.append(z[0])
         self.update_filter_from_zeropole()
 
-    def filter_samples(self, samples):
-        # filter signal here using obtained impulse response equation
-        filtered_samples = []
+    def filter_samples(self,samples):
+        # filter signal 
+  
+        
+
+        filtered_samples=sg.lfilter(b=self.numerator,a=self.denominator,x=samples)
+        print(filtered_samples)
         return filtered_samples
 
     def get_filter_dict(self):
         return asdict(self)
+    def get_delay_count(self):
+        dimension=max(len(self.denominator), len(self.numerator)) - 1
+        return dimension
