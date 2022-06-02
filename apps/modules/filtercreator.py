@@ -6,7 +6,6 @@ import copy
 import numpy as np
 
 
-#TODO loop on imaginary part
 
 @dataclass
 class Filter():
