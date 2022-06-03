@@ -9,7 +9,8 @@ from dash.dependencies import Input, Output, State
 import plotly.graph_objects as go
 import numpy as np
 import cmath
-import math 
+import math
+import json
 from apps.modules import filtercreator
 from scipy import signal as sg
 from numpy import conjugate
@@ -55,6 +56,7 @@ def updating_figure_desgin(figure=None,data_index=0,x=[],y=[],symbol='circle-ope
     scatter=figure.data[data_index]
     scatter.x=list(x)
     scatter.y=list(y)
+    print("updated")
     if figure==z_plane_fig:
         scatter.marker.symbol=symbol
     
@@ -62,7 +64,7 @@ def  updating_all_figures():
     
     updating_figure_desgin(figure=z_plane_fig,data_index=1,x=np.real(filter.filter_zeros),y=np.imag(filter.filter_zeros),symbol='circle-open')
     updating_figure_desgin(figure=z_plane_fig,data_index=2,x=np.real(filter.filter_poles),y=np.imag(filter.filter_poles),symbol='x-thin-open')
-
+    
     updating_figure_desgin(figure=magnitude_fig,data_index=0,x=filter.w,y=filter.filter_magnitude_response)
     updating_figure_desgin(figure=phase_fig,data_index=0,x=filter.w,y=filter.filter_phase_response)   
 
@@ -71,7 +73,12 @@ def  updating_all_figures():
 zplane_card = dbc.Card(
     [
         dbc.CardHeader("Z-Plane"),
-        dbc.CardBody(dcc.Graph(id='z_plane', figure= init_zplane_plot()), className = "p-0"
+        dbc.CardBody(dcc.Graph(id='z_plane', figure= init_zplane_plot(), config={
+            'editable': True,
+            'edits': {
+                'shapePosition': True
+            }
+        }), className = "p-0"
     )],
     )
 
@@ -159,7 +166,8 @@ def design_tab_layout():
         dbc.Row([
             dbc.Col([zplane_card,html.Br(), options_card], width=3),
             dbc.Col([mag_card, html.Br(), phase_card])
-            ])
+            ]),
+        html.Pre(id='relayout-data')
         ],            
                       )
     return layout
@@ -214,10 +222,10 @@ SAMPLING_FREQ=44100
     Input("dropdown_zeros","n_clicks"),
     Input("dropdown_poles","n_clicks"),
     Input("dropdown_all","n_clicks"),
-
     Input("z_plane", "clickData"),
+    [Input('z_plane', 'relayoutData')]
 )
-def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,delete_click,activated,zclicks,pclicks,allclicks,clicked_data):
+def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,delete_click,activated,zclicks,pclicks,allclicks,clicked_data, relayoutData):
     num=[]
     den=[]
     real_num=[]
@@ -309,22 +317,39 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
     
 
 
-    if clicked_data is not None:
+    if clicked_data is not None and ctx.triggered[0]['value'] != None and ctx.triggered[0]['value'] != {'autosize': True}:
+        print(clicked_data)
         #TODO: handle if the arrays of zeros and poles are empty
-        
         data=clicked_data['points'][0]['curveNumber']
         y=clicked_data['points'][0]['y']
         x=clicked_data['points'][0]['x']
+        
+        #TODO modify the array in index 0 
+        z_plane_fig.plotly_relayout({'shapes': [{'type':'circle', 'fillcolor':'#7f7f7f', 'line':{'width':0}, 'opacity':0.3, 'x0':x-0.07, 'x1':x+0.07, 'y0':y-0.07, 'y1':y+0.07}]})
         if data == 1 and 'delete_button' in changed_id:
             filter.remove_pole_zero(x+y*1j,filter.filter_zeros)
-           
+            z_plane_fig.plotly_relayout({'shapes': []})
+            updating_all_figures()
         elif data == 2 and 'delete_button' in changed_id:
             filter.remove_pole_zero(x+y*1j,filter.filter_poles)
-           
-        updating_all_figures()
-    
-    clicked_data = None
+            z_plane_fig.plotly_relayout({'shapes': []})
+            updating_all_figures()
+            # if 'conj_checklist' in changed_id and activated:
+            #     filter.remove_conjugate(polezero='pole',input=conjugate(x+y*1j))
 
+        if ctx.triggered[0]['value'] != None and ctx.triggered[0]['value'] != {'autosize': True} and ctx.triggered_id == 'z_plane' and 'shapes[0].y0' in ctx.triggered[0]['value']:
+            x_new = (ctx.triggered[0]['value']['shapes[0].x0'] + ctx.triggered[0]['value']['shapes[0].x1']) / 2
+            y_new = (ctx.triggered[0]['value']['shapes[0].y0'] + ctx.triggered[0]['value']['shapes[0].y1']) / 2
+            if data == 1:
+                filter.edit_zero(x+y*1j, x_new + y_new*1j)
+            elif data == 2:
+                filter.edit_pole(x+y*1j, x_new + y_new*1j)
+            z_plane_fig.plotly_relayout({'shapes': []})
+            updating_all_figures()
+
+    clicked_data = None
+    if ctx.triggered_id != "z_plane":
+        z_plane_fig.plotly_relayout({'shapes': []})
     # we return the figure in the "figure =" of zplot (find z plot card)
     #changing the array to list so the data in store id is right
     zeros = []

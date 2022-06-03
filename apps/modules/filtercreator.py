@@ -7,6 +7,7 @@ import numpy as np
 
 
 
+
 @dataclass
 class Filter():
     filter_poles: list = field(default_factory=list, repr=True)
@@ -52,8 +53,8 @@ class Filter():
         self.numerator = num
         self.denominator = den
         self.filter_freq_response = freq_resp
-
         return
+      
     # TODO CHECK IF ALL POLES HAVE A CONJUGATE OR NOT??
    
     def enable_conjugates(self, boolean: bool = False):
@@ -126,8 +127,25 @@ class Filter():
         self.update_filter_from_zeropole()
 
 
-    # CLEARS ALL ZEROS/POLES OR BOTH 
-    
+
+    # TODO must work with conjugates and updaters
+    def edit_pole(self, pole, new_pole):
+        for i in range(len(self.filter_poles)):
+  
+        # replace hardik with shardul
+            if self.filter_poles[i] == pole:
+                self.filter_poles[i] = new_pole
+        self.update_filter_from_zeropole()
+
+    # TODO must work with conjugates and updaters
+    def edit_zero(self, zero, new_zero):
+        for i in range(len(self.filter_zeros)):
+  
+        # replace hardik with shardul
+            if self.filter_zeros[i] == zero:
+                self.filter_zeros[i] = new_zero
+        self.update_filter_from_zeropole()
+
     def clear_filter(self):
         self.filter_poles = []
         self.filter_zeros = []
@@ -144,15 +162,6 @@ class Filter():
         self.filter_zeros = []
         self.conjugate_zeros = []
         self.update_filter_from_zeropole()
-   
-
-    # TODO must work with conjugates and updaters
-    def edit_pole(self, pole, new_pole):
-        self.filter_poles[pole] = new_pole
-
-    # TODO must work with conjugates and updaters
-    def edit_zero(self, zero, new_zero):
-        self.filter_zeros[zero] = new_zero
 
     def filter_type(self):
         if len(self.filter_poles) == 0:
