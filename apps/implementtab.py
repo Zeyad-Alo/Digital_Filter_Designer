@@ -70,7 +70,7 @@ def implement_tab_layout():
             id='interval_component',
             interval=1*1000,  # in milliseconds
             n_intervals=0, disabled=False
-        ), dcc.Store(id='time_data'), dcc.Store(id='mag_data')
+        ), dcc.Store(id='time_data'), dcc.Store(id='mag_data'),dcc.Store(id='counter',data=0)
     ],
     )
     return layout
@@ -143,6 +143,8 @@ def Signal_update(contents, filenames, last_modified):
     Output("original_signal", "figure"),
     Output("filtered_signal", "figure"),
     Output('interval_component', 'disabled'),
+    Output("counter", "data"),
+
 
     Input("store_corrected_zeros", "data"),
     Input("store_corrected_poles", "data"),
@@ -151,9 +153,10 @@ def Signal_update(contents, filenames, last_modified):
     Input("interval_component", "disabled"),
     Input("time_data", "data"),
     Input("mag_data", "data"),
+    Input("counter", "data"),
 
 )
-def Signal_update(zeros, poles, speed, n, disabled, time, mag):
+def Signal_update(zeros, poles, speed, n, disabled, time, mag,counter):
     # TODO DONT FORGET TIME PROGRESS
     time = np.array(time)
     mag = np.array(mag)
@@ -168,9 +171,9 @@ def Signal_update(zeros, poles, speed, n, disabled, time, mag):
     if len(time) != 0:
 
         print_debug("UPDATING FIGURE")
-
-        pointsToAppend = 100*n*int(speed)
-        pointsToAppendOld = pointsToAppend - 100*n*int(speed)
+        counter=counter+1
+        pointsToAppend = 100*counter*int(speed)
+        pointsToAppendOld = pointsToAppend - 100*counter*int(speed)
         print_debug(pointsToAppendOld)
         if pointsToAppendOld or pointsToAppend >= len(time):
             disabled = True
@@ -195,4 +198,4 @@ def Signal_update(zeros, poles, speed, n, disabled, time, mag):
     elif len(time) == 0:
 
         print_debug("lasa mad5lsh 7aga")
-    return signal_fig, filterd_signal_fig, disabled
+    return signal_fig, filterd_signal_fig, disabled,counter

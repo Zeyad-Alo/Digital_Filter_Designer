@@ -1,6 +1,10 @@
-# Digital_Filter_Designer
+# Digital Filter Designer
 
 A Webapp that assists users in designing a customer filter by visualizing the filter response in the z-plane, applying phase correction and then testing the filter on a real-world signal.
+
+## Website
+![Heroku](https://pyheroku-badge.herokuapp.com/?app=digital-filter-designer)
+### 🔗 <a href="https://digital-filter-designer.herokuapp.com/">Go to website</a>
 
 ## Features
 
@@ -27,6 +31,6 @@ A Webapp that assists users in designing a customer filter by visualizing the fi
 | Name | Role |
 | --- | --- |
 | Zeyad Mansour| UI Design, Phase Correction, Dragging Functionality|
-| Mariam Hanfy| Filter Implementation, Filter Design|
+| Mariam Hanafy| Filter Implementation, Filter Design|
 | Abdullah Saeed| Filter design improvement, Conjugate toggle support|
 | Mohamed Nasser| OOP Implementation and bug fixing|
