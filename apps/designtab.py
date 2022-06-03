@@ -56,6 +56,7 @@ def updating_figure_desgin(figure=None,data_index=0,x=[],y=[],symbol='circle-ope
     scatter=figure.data[data_index]
     scatter.x=list(x)
     scatter.y=list(y)
+    print("updated")
     if figure==z_plane_fig:
         scatter.marker.symbol=symbol
     
@@ -316,18 +317,14 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
 
 
     if clicked_data is not None and ctx.triggered[0]['value'] != None and ctx.triggered[0]['value'] != {'autosize': True}:
-        print(ctx.triggered)
-        #print(clicked_data)
+        print(clicked_data)
         #TODO: handle if the arrays of zeros and poles are empty
-        #print("clicked data")
-        #print(clicked_data)
         data=clicked_data['points'][0]['curveNumber']
         y=clicked_data['points'][0]['y']
         x=clicked_data['points'][0]['x']
         
         #TODO modify the array in index 0 
-        print(z_plane_fig)
-        z_plane_fig.add_shape(type="circle", fillcolor = "#7f7f7f", line={'width':0}, opacity=0.3, x0=x-0.07, x1=x+0.07, y0=y-0.07, y1=y+0.07)
+        z_plane_fig.plotly_relayout({'shapes': [{'type':'circle', 'fillcolor':'#7f7f7f', 'line':{'width':0}, 'opacity':0.3, 'x0':x-0.07, 'x1':x+0.07, 'y0':y-0.07, 'y1':y+0.07}]})
         if data == 1 and 'delete_button' in changed_id:
             filter.remove_zero(x+y*1j)
             z_plane_fig.plotly_relayout({'shapes': []})
@@ -335,32 +332,29 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
            
             # if 'conj_checklist' in changed_id and activated:
             #     filter.conjugate_zeros.remove(input)
-            #     # filter.remove_conjugate(polezero='zero',input=conjugate(x+y*1j))        z_plane_fig.add_shape(type="circle", fillcolor = "white")
+            #     # filter.remove_conjugate(polezero='zero',input=conjugate(x+y*1j))
         elif data == 2 and 'delete_button' in changed_id:
             filter.remove_pole(x+y*1j)
             z_plane_fig.plotly_relayout({'shapes': []})
+            updating_all_figures()
             # if 'conj_checklist' in changed_id and activated:
             #     filter.remove_conjugate(polezero='pole',input=conjugate(x+y*1j))
-            updating_all_figures()
 
         if ctx.triggered[0]['value'] != None and ctx.triggered[0]['value'] != {'autosize': True} and ctx.triggered_id == 'z_plane' and 'shapes[0].y0' in ctx.triggered[0]['value']:
-            data=clicked_data['points'][0]['curveNumber']
-            y=clicked_data['points'][0]['y']
-            x=clicked_data['points'][0]['x']
+            x_new = (ctx.triggered[0]['value']['shapes[0].x0'] + ctx.triggered[0]['value']['shapes[0].x1']) / 2
+            y_new = (ctx.triggered[0]['value']['shapes[0].y0'] + ctx.triggered[0]['value']['shapes[0].y1']) / 2
             if data == 1:
-                filter.edit_zero(x+y*1j, ctx.triggered[0]['value']['shapes[0].x0']+ ctx.triggered[0]['value']['shapes[0].y0']*1j)
-                #print(filter.get_filter_dict()['filter_zeros'])
+                filter.edit_zero(x+y*1j, x_new + y_new*1j)
             elif data == 2:
-                filter.edit_pole(x+y*1j, ctx.triggered[0]['value']['shapes[0].x0']+ ctx.triggered[0]['value']['shapes[0].y0']*1j)
-                #print(filter.get_filter_dict()['filter_zeros'])
+                filter.edit_pole(x+y*1j, x_new + y_new*1j)
             z_plane_fig.plotly_relayout({'shapes': []})
             updating_all_figures()
                 
 
-
-    print(z_plane_fig.layout.shapes)
     clicked_data = None
 
+    if ctx.triggered_id != "z_plane":
+        z_plane_fig.plotly_relayout({'shapes': []})
     # we return the figure in the "figure =" of zplot (find z plot card)
     #changing the array to list so the data in store id is right
     zeros = []
@@ -370,16 +364,3 @@ def zplane_mag_phase_update(nclicks,mag_value,theta_value,z_active,p_active,dele
     for i in filter.get_filter_dict()['filter_poles']:
         poles.append(str(i))
     return z_plane_fig,magnitude_fig,phase_fig, real_num,imag_num,real_den,imag_den, zeros, poles
-
-
-
-@app.callback(
-    Output('relayout-data', 'children'),
-    [Input('z_plane', 'relayoutData')])
-def display_selected_data(relayoutData):
-    if ctx.triggered[0]['value'] != None and ctx.triggered[0]['value'] != {'autosize': True} and 'shapes[0].y0' in ctx.triggered[0]['value']:
-        print(ctx.triggered_id)
-        #print(ctx.triggered_prop_ids)
-        print(ctx.triggered[0]['value']['shapes[0].x0'])
-        #print(relayoutData)
-        return json.dumps(relayoutData, indent=2)
