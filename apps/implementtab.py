@@ -35,7 +35,7 @@ filtered_signal_card = dbc.Card(
         dbc.CardFooter(
             dbc.Row([
                 dbc.Col(dcc.Markdown('Speed', className="p-0"), width=1),
-                dbc.Col(dcc.Slider(0, 50, value=0, marks=None, id = 'speed_slider',
+                dbc.Col(dcc.Slider(1, 12, value=1, marks=None, id = 'speed_slider',
     tooltip={"placement": "bottom", "always_visible": False}, className="p-0"), style={'padding-top':'8px'})
                 ]),
             )
@@ -170,10 +170,11 @@ def Signal_update(zeros,poles, speed,n,disabled,time,mag,interval):
         filter.add_pole_zero(complex(i),filter.filter_poles)
 
     print ("interval")
+
     print(interval)
+
     print("store") 
-    if speed >0:
-        interval= int(1000*speed)
+    
 
 
     
@@ -186,28 +187,25 @@ def Signal_update(zeros,poles, speed,n,disabled,time,mag,interval):
   
         
 
-        pointsToAppend  = 500*n
-        pointsToAppendOld= pointsToAppend - 500*n
-
-        #delay_start= pointsToAppendOld -filter.get_delay_count()
-
-        #if delay_start<0:
-
-            #mag_delay=[]
-        #else:
-            #mag_delay=mag[delay_start:pointsToAppendOld]
-
-        filtred_mag=filter.filter_samples(mag[pointsToAppendOld:pointsToAppend])
+        print("speed")
+        print(speed)
+        pointsToAppend  = 100*n*(int(speed))
+        pointsToAppendOld= pointsToAppend - 100*n*(int(speed))
+        print(pointsToAppendOld)
+        if pointsToAppendOld or pointsToAppend >=len(time):
+            disabled=True 
+        else:
+            filtred_mag=filter.filter_samples(mag[pointsToAppendOld:pointsToAppend])
 
 
-        print(filtred_mag)
+            print(filtred_mag)
 
-        updating_figure_implement(figure=signal_fig,x=time[pointsToAppendOld:pointsToAppend],y=mag[pointsToAppendOld:pointsToAppend])
-
-        signal_fig.update_layout(xaxis_range=[time[pointsToAppendOld], time[pointsToAppend]])
-
-        updating_figure_implement(figure=filterd_signal_fig,x=time[pointsToAppendOld:pointsToAppend],y=filtred_mag[pointsToAppendOld:pointsToAppend])
+            updating_figure_implement(figure=signal_fig,x=time[pointsToAppendOld:pointsToAppend],y=mag[pointsToAppendOld:pointsToAppend])
         
+            signal_fig.update_layout(xaxis_range=[time[pointsToAppendOld], time[pointsToAppend]])
+
+            updating_figure_implement(figure=filterd_signal_fig,x=time[pointsToAppendOld:pointsToAppend],y=filtred_mag[pointsToAppendOld:pointsToAppend])
+            filterd_signal_fig.update_layout(xaxis_range=[time[pointsToAppendOld], time[pointsToAppend]])
             
 
     elif len(time)==0:

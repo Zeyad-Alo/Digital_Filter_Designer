@@ -177,9 +177,9 @@ def add_allpass_to_list(value, n_clicks, custom_value, delete_n_clicks, children
 
     if button_id != "allpass_dropdown" and button_id != "add_allpass_button" and button_id != "custom_allpass_input" and button_id != "delete_button":
         for i in zeros:
-            filter.add_zero(complex(i))
+            filter.add_pole_zero(complex(i),filter.filter_zeros)
         for i in poles:
-            filter.add_pole(complex(i))
+            filter.add_pole_zero(complex(i),filter.filter_poles)
         print("store")
 
     if value == "custom" and button_id == "add_allpass_button":
