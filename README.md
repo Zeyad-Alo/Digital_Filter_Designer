@@ -1,4 +1,4 @@
-# Digital_Filter_Designer
+# Digital Filter Designer
 
 A Webapp that assists users in designing a customer filter by visualizing the filter response in the z-plane, applying phase correction and then testing the filter on a real-world signal.
 
