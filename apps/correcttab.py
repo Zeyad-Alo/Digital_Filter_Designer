@@ -145,17 +145,20 @@ def correct_tab_layout():
 )
 def add_allpass_to_list(is_open, value, custom_value):
     button_id = ctx.triggered_id
-    if value != "custom":
-        represent_allpass(complex(value))
-        if is_open:
+    if value:
+        if value != "custom":
+            represent_allpass(complex(value))
+            if is_open:
+                return not is_open, allpass_zplane_fig, allpass_phase_fig
+            else:
+                return is_open, allpass_zplane_fig, allpass_phase_fig
+        elif value == "custom" and button_id == "allpass_dropdown":
             return not is_open, allpass_zplane_fig, allpass_phase_fig
-        else:
+        elif value == "custom" and button_id == "custom_allpass_input":
+            represent_allpass(complex(custom_value))
             return is_open, allpass_zplane_fig, allpass_phase_fig
-    elif value == "custom" and button_id == "allpass_dropdown":
-        return not is_open, allpass_zplane_fig, allpass_phase_fig
-    elif value == "custom" and button_id == "custom_allpass_input":
-        represent_allpass(complex(custom_value))
-        return is_open, allpass_zplane_fig, allpass_phase_fig
+    else: return is_open, allpass_zplane_fig, allpass_phase_fig
+    
 
 
 list_id = 0
@@ -176,6 +179,7 @@ def add_allpass_to_list(value, n_clicks, custom_value, delete_n_clicks, children
     button_id = ctx.triggered_id
 
     if button_id != "allpass_dropdown" and button_id != "add_allpass_button" and button_id != "custom_allpass_input" and button_id != "delete_button":
+        filter.clear_filter()
         for i in zeros:
             filter.add_zero(complex(i))
         for i in poles:
