@@ -6,8 +6,6 @@ import copy
 import numpy as np
 
 
-
-
 @dataclass
 class Filter():
     filter_poles: list = field(default_factory=list, repr=True)
@@ -54,61 +52,59 @@ class Filter():
         self.denominator = den
         self.filter_freq_response = freq_resp
         return
-      
+
     # TODO CHECK IF ALL POLES HAVE A CONJUGATE OR NOT??
-   
+
     def enable_conjugates(self, boolean: bool = False):
         self.conjugate_enable = boolean
         self.update_conjugates()
 
-   
     def update_conjugates(self):
         if self.conjugate_enable:
-            
-                temp_poles=[] 
-                temp_zeros=[]
+
+            temp_poles = []
+            temp_zeros = []
 
             # making filter_poles having the points and its conjugates
-                for pole in self.filter_poles: 
-                    if np.imag(pole) >= 0:
-                        temp_poles.append(pole)   
-                
-                temp_loop_poles=copy.copy(temp_poles)
-                for pole in temp_loop_poles:
-                        if np.imag(pole)!=0 :  
-                            temp_poles.append(conjugate(pole))
-                
-                self.filter_poles=temp_poles
+            for pole in self.filter_poles:
+                if np.imag(pole) >= 0:
+                    temp_poles.append(pole)
+
+            temp_loop_poles = copy.copy(temp_poles)
+            for pole in temp_loop_poles:
+                if np.imag(pole) != 0:
+                    temp_poles.append(conjugate(pole))
+
+            self.filter_poles = temp_poles
 
             # making filter_zeros having the points and its conjugates
-                for zero in self.filter_zeros:
-                    if np.imag(zero) >= 0:
-                        temp_zeros.append(zero)
-                
-                temp_loop_zeros=copy.copy(temp_zeros)
-                for zero in temp_loop_zeros:
-                    if np.imag(zero)!=0 :  
-                        temp_zeros.append(conjugate(zero))
+            for zero in self.filter_zeros:
+                if np.imag(zero) >= 0:
+                    temp_zeros.append(zero)
 
-                self.filter_zeros=temp_zeros
+            temp_loop_zeros = copy.copy(temp_zeros)
+            for zero in temp_loop_zeros:
+                if np.imag(zero) != 0:
+                    temp_zeros.append(conjugate(zero))
+
+            self.filter_zeros = temp_zeros
         else:
-                tmp_poles=copy.copy(self.filter_poles)
-                for pole in tmp_poles:
-                    if np.imag(pole) < 0:
-                        self.filter_poles.remove(pole)
-               
-                tmp_zeros=copy.copy(self.filter_zeros)
-                for zero in tmp_zeros:
-                    if np.imag(zero) < 0:
-                        self.filter_zeros.remove(zero)
+            tmp_poles = copy.copy(self.filter_poles)
+            for pole in tmp_poles:
+                if np.imag(pole) < 0:
+                    self.filter_poles.remove(pole)
+
+            tmp_zeros = copy.copy(self.filter_zeros)
+            for zero in tmp_zeros:
+                if np.imag(zero) < 0:
+                    self.filter_zeros.remove(zero)
 
         self.update_filter_from_zeropole()
 
+    # ADDING A POLE OR A ZERO
+# TODO  @NASSER bos 3ala el3azamaa
 
-    #ADDING A POLE OR A ZERO     
-#TODO  @NASSER bos 3ala el3azamaa
-   
-    def add_pole_zero(self,pole_or_zero,filter):
+    def add_pole_zero(self, pole_or_zero, filter):
         if self.conjugate_enable:
             filter.append(pole_or_zero)
             self.update_conjugates()
@@ -117,7 +113,7 @@ class Filter():
         self.update_filter_from_zeropole()
 
     # DELETING A POLE OR A ZERO
-#TODO  @NASSER bos 3ala el3azamaa
+# TODO  @NASSER bos 3ala el3azamaa
     def remove_pole_zero(self, pole_or_zero, filter):
         if self.conjugate_enable:
             filter.remove(pole_or_zero)
@@ -126,24 +122,25 @@ class Filter():
             filter.remove(pole_or_zero)
         self.update_filter_from_zeropole()
 
-
-
     # TODO must work with conjugates and updaters
+
     def edit_pole(self, pole, new_pole):
         for i in range(len(self.filter_poles)):
-  
-        # replace hardik with shardul
+
+            # replace hardik with shardul
             if self.filter_poles[i] == pole:
                 self.filter_poles[i] = new_pole
+        self.update_conjugates()
         self.update_filter_from_zeropole()
 
     # TODO must work with conjugates and updaters
     def edit_zero(self, zero, new_zero):
         for i in range(len(self.filter_zeros)):
-  
-        # replace hardik with shardul
+
+            # replace hardik with shardul
             if self.filter_zeros[i] == zero:
                 self.filter_zeros[i] = new_zero
+        self.update_conjugates()
         self.update_filter_from_zeropole()
 
     def clear_filter(self):
@@ -168,7 +165,6 @@ class Filter():
             self.filter_type = "FIR"
         else:
             self.filter_type = "IIR"
-    
 
     def get_phase_response(self):
         return self.filter_phase_response, self.w
@@ -193,17 +189,19 @@ class Filter():
         self.filter_zeros.append(z[0])
         self.update_filter_from_zeropole()
 
-    def filter_samples(self,samples):
-        # filter signal 
-  
-        filtered_samples=[]
+    def filter_samples(self, samples):
+        # filter signal
 
-        filtered_samples=sg.lfilter(b=self.numerator,a=self.denominator,x=samples)
-        
+        filtered_samples = []
+
+        filtered_samples = sg.lfilter(
+            b=self.numerator, a=self.denominator, x=samples)
+
         return np.real(filtered_samples)
 
     def get_filter_dict(self):
         return asdict(self)
+
     def get_delay_count(self):
-        dimension=max(len(self.denominator), len(self.numerator)) - 1
+        dimension = max(len(self.denominator), len(self.numerator)) - 1
         return dimension

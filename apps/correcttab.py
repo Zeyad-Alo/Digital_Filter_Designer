@@ -9,6 +9,7 @@ import numpy as np
 import cmath
 from apps.modules import filtercreator
 from scipy import signal as sg
+from apps.modules.utility import print_debug
 
 
 allpass_zplane_fig = go.FigureWidget(layout=dict(
@@ -96,8 +97,9 @@ all_pass_card = dbc.Card(
     [
         dbc.CardHeader("All Pass Filter"),
         dbc.CardBody([
-            dbc.Row([dbc.Col(dcc.Graph(id='allpass_zplane', figure=allpass_zplane_plot()), style={'padding-left': '0', 'padding-right': '0', 'padding-top': '0', 'margin-top': '0'}), dbc.Col(
-                dcc.Graph(id='allpass_phase', figure=allpass_phase_fig.add_scatter(x=[], y=[])), style={'padding-left': '0', 'padding-right': '0'})]),
+            dbc.Row(
+                [dbc.Col(dcc.Graph(id='allpass_zplane', figure=allpass_zplane_plot()), style={'padding-left': '0', 'padding-right': '0', 'padding-top': '0', 'margin-top': '0'}, className="col-lg-6"),
+                 dbc.Col(dcc.Graph(id='allpass_phase', figure=allpass_phase_fig.add_scatter(x=[], y=[])), style={'padding-left': '0', 'padding-right': '0'}, className="col-lg-6")]),
             dbc.Row(allpass_filters_lib_card),
             dbc.Row(dbc.Button("Apply!", id='apply_button',
                     color="dark", size='sm'))
@@ -128,10 +130,10 @@ def correct_tab_layout():
             style={'height': '50px', 'line-height': '50px', 'padding': '0px 25px'}
         ), style={'padding-left': '12px', 'padding-right': '12px'}),
         dbc.Row([
-            dbc.Col(all_pass_card),
-            dbc.Col(corrected_phase_card)
+            dbc.Col(all_pass_card, className="col-lg-8"),
+            dbc.Col(corrected_phase_card, className="col-lg-4")
         ])
-    ],)
+    ], className="container")
     return layout
 
 
@@ -157,8 +159,8 @@ def add_allpass_to_list(is_open, value, custom_value):
         elif value == "custom" and button_id == "custom_allpass_input":
             represent_allpass(complex(custom_value))
             return is_open, allpass_zplane_fig, allpass_phase_fig
-    else: return is_open, allpass_zplane_fig, allpass_phase_fig
-    
+    else:
+        return is_open, allpass_zplane_fig, allpass_phase_fig
 
 
 list_id = 0
@@ -181,10 +183,10 @@ def add_allpass_to_list(value, n_clicks, custom_value, delete_n_clicks, children
     if button_id != "allpass_dropdown" and button_id != "add_allpass_button" and button_id != "custom_allpass_input" and button_id != "delete_button":
         filter.clear_filter()
         for i in zeros:
-            filter.add_pole_zero(complex(i),filter.filter_zeros)
+            filter.add_pole_zero(complex(i), filter.filter_zeros)
         for i in poles:
-            filter.add_pole_zero(complex(i),filter.filter_poles)
-        print("store")
+            filter.add_pole_zero(complex(i), filter.filter_poles)
+        print_debug("store")
 
     if value == "custom" and button_id == "add_allpass_button":
         children.append(dbc.ListGroupItem(custom_value, id={'item': str(
@@ -194,7 +196,7 @@ def add_allpass_to_list(value, n_clicks, custom_value, delete_n_clicks, children
         children.append(dbc.ListGroupItem(value, id={'item': str(n_clicks)}, style={
                         'color': 'black'}, action=True, active=False))
         filter.add_allpass_filter(complex(value))
-        print("3ayel")
+        print_debug("3ayel")
     if button_id == "delete_button":
         assassin_child = []
         for i in children:
@@ -203,7 +205,7 @@ def add_allpass_to_list(value, n_clicks, custom_value, delete_n_clicks, children
         for i in assassin_child:
             children.remove(i)
             filter.remove_allpass_filter(complex(i['props']['children']))
-        print(children)
+        print_debug(children)
 
     update_corrected_phase_fig()
     return children, corrected_phase_fig
@@ -223,7 +225,7 @@ def represent_allpass(a):
     w, h = sg.freqz([-a, 1.0], [1.0, -a])
 
     scatter = allpass_phase_fig.data[0]
-    scatter.x = w/max(w)
+    scatter.x = w
     scatter.y = np.unwrap(np.angle(h))
 
 
@@ -239,7 +241,7 @@ def select_allpass(n, active):
 
 def update_corrected_phase_fig():
     phase, w = filter.get_phase_response()
-    print(filter.get_filter_dict()['filter_zeros'])
+    print_debug(filter.get_filter_dict()['filter_zeros'])
     scatter = corrected_phase_fig.data[0]
     scatter.x = w
     scatter.y = phase
