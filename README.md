@@ -2,6 +2,10 @@
 
 A Webapp that assists users in designing a customer filter by visualizing the filter response in the z-plane, applying phase correction and then testing the filter on a real-world signal.
 
+## Website
+![Heroku](https://pyheroku-badge.herokuapp.com/?app=digital-filter-designer)
+### 🔗 <a href="https://digital-filter-designer.herokuapp.com/">Go to website</a>
+
 ## Features
 
 - [x] Filter design
