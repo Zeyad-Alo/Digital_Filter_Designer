@@ -40,7 +40,7 @@ filtered_signal_card = dbc.Card(
         dbc.CardFooter(
             dbc.Row([
                 dbc.Col(dcc.Markdown('Speed', className="p-0"), width=1),
-                dbc.Col(dcc.Slider(1, 6, 1, value=1, marks=None, id='speed_slider',
+                dbc.Col(dcc.Slider(1, 10, 1, value=1, marks=None, id='speed_slider',
                                    tooltip={"placement": "bottom", "always_visible": False}, className="p-0"), style={'padding-top': '8px'})
             ]),
         )
@@ -68,9 +68,9 @@ def implement_tab_layout():
         html.Br(),
         dbc.Row(filtered_signal_card), dcc.Interval(
             id='interval_component',
-            interval=1*1000,  # in milliseconds
+            interval=1*100,  # in milliseconds
             n_intervals=0, disabled=False
-        ), dcc.Store(id='time_data'), dcc.Store(id='mag_data'),dcc.Store(id='counter',data=0)
+        ), dcc.Store(id='time_data'), dcc.Store(id='mag_data'),dcc.Store(id='counter',data=0),dcc.Store(id='toggle',data=True)
     ],
     )
     return layout
@@ -144,7 +144,7 @@ def Signal_update(contents, filenames, last_modified):
     Output("filtered_signal", "figure"),
     Output('interval_component', 'disabled'),
     Output("counter", "data"),
-
+    Output("toggle", "data"),
 
     Input("store_corrected_zeros", "data"),
     Input("store_corrected_poles", "data"),
@@ -154,9 +154,10 @@ def Signal_update(contents, filenames, last_modified):
     Input("time_data", "data"),
     Input("mag_data", "data"),
     Input("counter", "data"),
+    Input("toggle", "data"),
 
 )
-def Signal_update(zeros, poles, speed, n, disabled, time, mag,counter):
+def Signal_update(zeros, poles, speed, n, disabled, time, mag,counter,toggle):
     # TODO DONT FORGET TIME PROGRESS
     time = np.array(time)
     mag = np.array(mag)
@@ -171,31 +172,39 @@ def Signal_update(zeros, poles, speed, n, disabled, time, mag,counter):
     if len(time) != 0:
 
         print_debug("UPDATING FIGURE")
-        counter=counter+1
-        pointsToAppend = 100*counter*int(speed)
-        pointsToAppendOld = pointsToAppend - 100*counter*int(speed)
-        print_debug(pointsToAppendOld)
-        if pointsToAppendOld or pointsToAppend >= len(time):
-            disabled = True
+        if toggle ==True:
+            counter=counter+1
+            pointsToAppend = 50*counter*int(speed)
+            constant=50*int(speed)
+            pointsToAppendOld = pointsToAppend - constant
+
+            
+            if pointsToAppendOld  >= len(time):
+
+                
+                disabled = True
+            else:
+                filtred_mag = filter.filter_samples(
+                    mag[pointsToAppendOld:pointsToAppend])
+
+                
+
+                updating_figure_implement(
+                    figure=signal_fig, x=time[pointsToAppendOld:pointsToAppend], y=mag[pointsToAppendOld:pointsToAppend])
+
+                
+
+                updating_figure_implement(
+                    figure=filterd_signal_fig, x=time[pointsToAppendOld:pointsToAppend], y=filtred_mag)
+
+                
+
+                disabled = False
+            toggle= False
         else:
-            filtred_mag = filter.filter_samples(
-                mag[pointsToAppendOld:pointsToAppend])
-
-            updating_figure_implement(
-                figure=signal_fig, x=time[pointsToAppendOld:pointsToAppend], y=mag[pointsToAppendOld:pointsToAppend])
-
-            signal_fig.update_layout(
-                xaxis_range=[time[pointsToAppendOld], time[pointsToAppend]])
-
-            updating_figure_implement(
-                figure=filterd_signal_fig, x=time[pointsToAppendOld:pointsToAppend], y=filtred_mag[pointsToAppendOld:pointsToAppend])
-
-            filterd_signal_fig.update_layout(
-                xaxis_range=[time[pointsToAppendOld], time[pointsToAppend]])
-
-            disabled = False
-
+            
+            toggle=True
     elif len(time) == 0:
 
-        print_debug("lasa mad5lsh 7aga")
-    return signal_fig, filterd_signal_fig, disabled,counter
+        print_debug("Did not enter")
+    return signal_fig, filterd_signal_fig, disabled,counter,toggle
