@@ -35,7 +35,7 @@ filtered_signal_card = dbc.Card(
         dbc.CardFooter(
             dbc.Row([
                 dbc.Col(dcc.Markdown('Speed', className="p-0"), width=1),
-                dbc.Col(dcc.Slider(1, 12, value=1, marks=None, id = 'speed_slider',
+                dbc.Col(dcc.Slider(1, 6, 1,value=1, marks=None, id = 'speed_slider',
     tooltip={"placement": "bottom", "always_visible": False}, className="p-0"), style={'padding-top':'8px'})
                 ]),
             )
@@ -144,7 +144,7 @@ def Signal_update(contents,filenames,last_modified):
 @app.callback(
     Output("original_signal", "figure"),
     Output("filtered_signal", "figure"),
-    Output('upload-data', 'interval'),
+    Output('interval_component', 'disabled'),
 
     Input("store_corrected_zeros", "data"),
     Input("store_corrected_poles", "data"),
@@ -153,11 +153,10 @@ def Signal_update(contents,filenames,last_modified):
     Input("interval_component", "disabled"),
     Input("time_data", "data"),
     Input("mag_data", "data"),
-    State('upload-data', 'interval'),
     
 )
 
-def Signal_update(zeros,poles, speed,n,disabled,time,mag,interval):
+def Signal_update(zeros,poles, speed,n,disabled,time,mag):
     #TODO DONT FORGET TIME PROGRESS
     time=np.array(time)
     mag=np.array(mag)
@@ -169,47 +168,34 @@ def Signal_update(zeros,poles, speed,n,disabled,time,mag,interval):
     for i in poles:
         filter.add_pole_zero(complex(i),filter.filter_poles)
 
-    print ("interval")
-
-    print(interval)
-
-    print("store") 
-    
-
-
     
     if len(time)!=0:
        
         print("UPDATING FIGURE")
        
-        print("time length")
-        print(len(time))
-  
-        
-
-        print("speed")
-        print(speed)
-        pointsToAppend  = 100*n*(int(speed))
-        pointsToAppendOld= pointsToAppend - 100*n*(int(speed))
+    
+        pointsToAppend  = 100*n*int(speed)
+        pointsToAppendOld= pointsToAppend - 100*n*int(speed)
         print(pointsToAppendOld)
         if pointsToAppendOld or pointsToAppend >=len(time):
             disabled=True 
         else:
             filtred_mag=filter.filter_samples(mag[pointsToAppendOld:pointsToAppend])
-
-
-            print(filtred_mag)
-
+            
             updating_figure_implement(figure=signal_fig,x=time[pointsToAppendOld:pointsToAppend],y=mag[pointsToAppendOld:pointsToAppend])
         
+            
             signal_fig.update_layout(xaxis_range=[time[pointsToAppendOld], time[pointsToAppend]])
-
+            
             updating_figure_implement(figure=filterd_signal_fig,x=time[pointsToAppendOld:pointsToAppend],y=filtred_mag[pointsToAppendOld:pointsToAppend])
+
             filterd_signal_fig.update_layout(xaxis_range=[time[pointsToAppendOld], time[pointsToAppend]])
+
+            disabled=False
             
 
     elif len(time)==0:
         
         print("lasa mad5lsh 7aga")
-    return  signal_fig,filterd_signal_fig,interval
+    return  signal_fig,filterd_signal_fig,disabled
 
