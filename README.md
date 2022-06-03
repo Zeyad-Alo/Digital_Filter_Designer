@@ -31,6 +31,6 @@ A Webapp that assists users in designing a customer filter by visualizing the fi
 | Name | Role |
 | --- | --- |
 | Zeyad Mansour| UI Design, Phase Correction, Dragging Functionality|
-| Mariam Hanfy| Filter Implementation, Filter Design|
+| Mariam Hanafy| Filter Implementation, Filter Design|
 | Abdullah Saeed| Filter design improvement, Conjugate toggle support|
 | Mohamed Nasser| OOP Implementation and bug fixing|
