@@ -257,24 +257,27 @@ def zplane_mag_phase_update(nclicks, mag_value, theta_value, z_active, p_active,
     real_den = []
     imag_den = []
 
-    # TODO: return the num and den since its needed for the other tabs
- # this is initialized in order to know which button is pressed
     changed_id = [p['prop_id'] for p in callback_context.triggered][0]
     # theta value and mag value are taken from the sliders
     z_axis = cmath.rect(mag_value, (theta_value*np.pi/180))
     # this loop is entred when both the zeros button is open and the user pressed add
+   
     if z_active and 'add_button' in changed_id:
         # print_debug("zeros")
-        filter.add_pole_zero(z_axis, filter.filter_zeros)
+        filter.add_pole_zero(z_axis, filter=filter.filter_zeros,filter_check=filter.filter_poles)
 
         updating_figure_desgin(figure=z_plane_fig, data_index=1, x=np.real(
             filter.filter_zeros), y=np.imag(filter.filter_zeros), symbol='circle-open')
+        updating_figure_desgin(figure=z_plane_fig, data_index=2, x=np.real(
+            filter.filter_poles), y=np.imag(filter.filter_poles), symbol='x-thin-open')
         # this loop is entred when both the poles button is open and the user pressed add
     elif p_active and 'add_button' in changed_id:
         # print_debug("poles")
-        filter.add_pole_zero(z_axis, filter.filter_poles)
+        filter.add_pole_zero(z_axis, filter=filter.filter_poles,filter_check=filter.filter_zeros)
         print_debug("THHHHHHHHHe filter")
         # print_debug(filter.get_filter_dict())
+        updating_figure_desgin(figure=z_plane_fig, data_index=1, x=np.real(
+            filter.filter_zeros), y=np.imag(filter.filter_zeros), symbol='circle-open')
         updating_figure_desgin(figure=z_plane_fig, data_index=2, x=np.real(
             filter.filter_poles), y=np.imag(filter.filter_poles), symbol='x-thin-open')
 

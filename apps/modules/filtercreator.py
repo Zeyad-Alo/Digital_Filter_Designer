@@ -104,13 +104,18 @@ class Filter():
     # ADDING A POLE OR A ZERO
 # TODO  @NASSER bos 3ala el3azamaa
 
-    def add_pole_zero(self, pole_or_zero, filter):
+    def add_pole_zero(self, pole_or_zero, filter=[],filter_check=[]):
         if self.conjugate_enable:
             filter.append(pole_or_zero)
             self.update_conjugates()
+
         else:
             filter.append(pole_or_zero)
-        self.update_filter_from_zeropole()
+
+        if pole_or_zero in filter_check:
+            self.Cancel_pole_zero(pole_or_zero)
+        else:
+            self.update_filter_from_zeropole()
 
     # DELETING A POLE OR A ZERO
 # TODO  @NASSER bos 3ala el3azamaa
@@ -123,6 +128,11 @@ class Filter():
         self.update_filter_from_zeropole()
 
     # TODO must work with conjugates and updaters
+
+    def Cancel_pole_zero(self, pole_or_zero):
+        self.filter_poles.remove(pole_or_zero)
+        self.filter_zeros.remove(pole_or_zero)
+        self.update_filter_from_zeropole()
 
     def edit_pole(self, pole, new_pole):
         for i in range(len(self.filter_poles)):
