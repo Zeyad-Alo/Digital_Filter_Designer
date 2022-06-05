@@ -68,9 +68,9 @@ def implement_tab_layout():
         html.Br(),
         dbc.Row(filtered_signal_card), dcc.Interval(
             id='interval_component',
-            interval=1*100,  # in milliseconds
+            interval=10*100,  # in milliseconds
             n_intervals=0, disabled=False
-        ), dcc.Store(id='time_data'), dcc.Store(id='mag_data'),dcc.Store(id='counter',data=0),dcc.Store(id='toggle',data=True)
+        ), dcc.Store(id='time_data'), dcc.Store(id='mag_data'), dcc.Store(id='counter', data=0), dcc.Store(id='toggle', data=True)
     ],
     )
     return layout
@@ -157,7 +157,7 @@ def Signal_init(contents, filenames, last_modified):
     Input("toggle", "data"),
 
 )
-def Signal_update(zeros, poles, speed, n, disabled, time, mag,counter,toggle):
+def Signal_update(zeros, poles, speed, n, disabled, time, mag, counter, toggle):
     # TODO DONT FORGET TIME PROGRESS
     time = np.array(time)
     mag = np.array(mag)
@@ -172,36 +172,28 @@ def Signal_update(zeros, poles, speed, n, disabled, time, mag,counter,toggle):
     if len(time) != 0:
 
         print_debug("UPDATING FIGURE")
-        
-        counter=counter+1
+
+        counter = counter+1
         pointsToAppend = 50*counter*int(speed)
-        constant=50*int(speed)
+        constant = 50*int(speed)
         pointsToAppendOld = pointsToAppend - constant
 
-            
-        if pointsToAppendOld  >= len(time):
+        if pointsToAppendOld >= len(time):
 
-                
             disabled = True
         else:
             filtred_mag = filter.filter_samples(
                 mag[pointsToAppendOld:pointsToAppend])
 
-                
-
             updating_figure_implement(
                 figure=signal_fig, x=time[pointsToAppendOld:pointsToAppend], y=mag[pointsToAppendOld:pointsToAppend])
-
-                
 
             updating_figure_implement(
                 figure=filterd_signal_fig, x=time[pointsToAppendOld:pointsToAppend], y=filtred_mag)
 
-                
-
             disabled = False
-         
+
     elif len(time) == 0:
 
         print_debug("Did not enter")
-    return signal_fig, filterd_signal_fig, disabled,counter,toggle
+    return signal_fig, filterd_signal_fig, disabled, counter, toggle
