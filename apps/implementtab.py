@@ -83,7 +83,7 @@ def updating_figure_implement(figure=None, data_index=0, x=[], y=[]):
 
 
 def parse_contents(contents, filename, date):
-    pd.options.display.max_rows = 10000
+    pd.options.display.max_rows = 100000
     content_type, content_string = contents.split(',')
 
     decoded = base64.b64decode(content_string)
@@ -116,7 +116,7 @@ def parse_contents(contents, filename, date):
 
 
 )
-def Signal_update(contents, filenames, last_modified):
+def Signal_init(contents, filenames, last_modified):
     # TODO DONT FORGET TIME PROGRESS
     print_debug("DATA FROM FILE")
     mag = []
@@ -172,38 +172,35 @@ def Signal_update(zeros, poles, speed, n, disabled, time, mag,counter,toggle):
     if len(time) != 0:
 
         print_debug("UPDATING FIGURE")
-        if toggle ==True:
-            counter=counter+1
-            pointsToAppend = 50*counter*int(speed)
-            constant=50*int(speed)
-            pointsToAppendOld = pointsToAppend - constant
+        
+        counter=counter+1
+        pointsToAppend = 50*counter*int(speed)
+        constant=50*int(speed)
+        pointsToAppendOld = pointsToAppend - constant
 
             
-            if pointsToAppendOld  >= len(time):
+        if pointsToAppendOld  >= len(time):
 
                 
-                disabled = True
-            else:
-                filtred_mag = filter.filter_samples(
-                    mag[pointsToAppendOld:pointsToAppend])
-
-                
-
-                updating_figure_implement(
-                    figure=signal_fig, x=time[pointsToAppendOld:pointsToAppend], y=mag[pointsToAppendOld:pointsToAppend])
-
-                
-
-                updating_figure_implement(
-                    figure=filterd_signal_fig, x=time[pointsToAppendOld:pointsToAppend], y=filtred_mag)
-
-                
-
-                disabled = False
-            toggle= False
+            disabled = True
         else:
-            
-            toggle=True
+            filtred_mag = filter.filter_samples(
+                mag[pointsToAppendOld:pointsToAppend])
+
+                
+
+            updating_figure_implement(
+                figure=signal_fig, x=time[pointsToAppendOld:pointsToAppend], y=mag[pointsToAppendOld:pointsToAppend])
+
+                
+
+            updating_figure_implement(
+                figure=filterd_signal_fig, x=time[pointsToAppendOld:pointsToAppend], y=filtred_mag)
+
+                
+
+            disabled = False
+         
     elif len(time) == 0:
 
         print_debug("Did not enter")
