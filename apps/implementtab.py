@@ -164,10 +164,12 @@ def Signal_update(zeros, poles, speed, n, disabled, time, mag, counter, toggle):
 
     filter = Filter()
 
-    for i in zeros:
-        filter.add_pole_zero(complex(i), filter.filter_zeros)
-    for i in poles:
-        filter.add_pole_zero(complex(i), filter.filter_poles)
+    if zeros is not None:
+        for i in zeros:
+            filter.add_pole_zero(complex(i), filter.filter_zeros)
+    if poles is not None:
+        for i in poles:
+            filter.add_pole_zero(complex(i), filter.filter_poles)
 
     if len(time) != 0:
 
@@ -178,7 +180,7 @@ def Signal_update(zeros, poles, speed, n, disabled, time, mag, counter, toggle):
         constant = 50*int(speed)
         pointsToAppendOld = pointsToAppend - constant
 
-        if pointsToAppendOld >= len(time):
+        if pointsToAppend >= len(time):
 
             disabled = True
         else:
